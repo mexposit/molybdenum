@@ -1,0 +1,14 @@
+Next steps:
+
+ - Functions:
+    - graph to mb representation
+    - form to mb representation
+    - maybe get rid of name and make names become ids?? I kind of like ids but maybe they are unecessary
+    
+ - implement the module in the web app.
+ - fill in the form with species, reactions, parameters... let user change name of species/reactions? I would say no bc we can't update graph! Name could be header of the dropdown/table identifying the specie or reaction. 
+ - make it so that if you write reaction expression, new parameters appear where necessary in the form
+ - add simulation parameters
+ - add button to run and show plot
+ - make the text boxes with antimony and simpleSBML models. Let user know they can modify model from there and changes will be reflected in simulation, but the graph will be incorrect (could potentially look how to draw graphs from the connections I have though, and tellurium have a graph representation in fact...)
+ - add options to see results, download, antimony model, etc...

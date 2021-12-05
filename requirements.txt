@@ -1,0 +1,13 @@
+python-libsedml==2.0.17
+libroadrunner==2.1.3
+phrasedml==1.1.1
+#tesedml==0.4.2
+tellurium==2.2.2.1
+simplesbml==2.3.0
+#numpy==1.21.4
+#pandas==1.3.4
+#matplotlib==3.5.0
+#seaborn==0.11.2
+#flask==2.0.2
+
+# use with python 3.9
