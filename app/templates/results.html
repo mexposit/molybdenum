@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block page_title %}LMPM results{% endblock %}
+{% block content %}
+
+<main role="main">
+    <div id="accordion">
+        <div class="container">
+            <div class="row pt-5">
+                <div class="col-md-12">
+
+                    <h1>Results</h1>
+
+                    <p>The probability of being {{ 'in the' if pred.query['location'] != 'secreted' }} <code>{{pred.query['location']}}</code> on <code>{{pred.query['organism']}}</code> for your input sequence is of <code>{{pred.result*100}}%</code>.</p>
+
+                    {% if pred.query['location'] != pred.predicted_loc %}
+                        <!-- If target class it is not the predicted localization, return the predicted localization -->
+                        <p>The predicted location for this protein on <code>{{pred.query['organism']}}</code> is <code>{{pred.predicted_loc}}</code> with a probability of <code>{{pred.predicted_prob*100}}%</code>.</p>
+                    {% else %}
+                        <!-- If target class is the predicted location, inform user about it -->
+                        <p>{{ pred.predicted_loc.capitalize() }} is the predicted location for your protein of interest.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Insert image representing prediction -->
+                    <img src="../static/img/logo_{{ pred.predicted_loc }}.png" class="img-fluid" alt="image with predicted location">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div id="accordion">
+
+                    <div class="card">
+                        <div class="card-header" id="headingzero">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" style="white-space:normal" data-toggle="collapse"
+                                    data-target="#collapsezero" aria-expanded="false" aria-controls="collapsezero">
+                                    Review query:
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapsezero" class="collapse" aria-labelledby="headingzero" data-parent="#accordion">
+                            <div class="card-body">
+                                <p>The selected organism was: <code>{{pred.query['organism']}}</code></p>
+                                <p>The selected localization was: <code>{{pred.query['location']}}</code></p>
+                                <p>The included features were <code>{{ 'included' if pred.query['include_dg'] else 'not included' }}</code>.</p>
+                                <p>The input sequence was: <code>{{ pred.query['sequence'] }}</code>.</p>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" id="headingtwo">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" style="white-space:normal" data-toggle="collapse"
+                                    data-target="#collapsetwo" aria-expanded="false" aria-controls="collapsetwo">
+                                    See the predictions in other locations and organisms:
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapsetwo" class="collapse" aria-labelledby="headingtwo" data-parent="#accordion">
+                            <div class="card-body">
+                                <p>The probabilities of being secreted in each localization for each organism are:</p>
+                                {% for table in tables %}
+                                    {{ table|safe }}
+                                {% endfor %}
+                                <p><i>Note that the probabilities should sum up to one within each organism.</i></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" style="white-space:normal" data-toggle="collapse"
+                                    data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Mutate sequence to improve localization score:
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                            <div class="card-body">
+
+                                <form method="POST" , action="{{url_for('mutate')}}">
+
+                                    <div class="form-group">
+                                        <label for="seqs"><b>Input sequence</b> (same as before by default):</label>
+                                        <textarea class="form-control" name='seqs' id="seqs"
+                                            rows="4">{{seqs}}</textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p><b>Select organism of interest:</b></p>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="species" value="human"
+                                                id="human">
+                                            <label class="form-check-label" for="human"><i>Homo sapiens</i></label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="species" value="yeast"
+                                                id="yeast">
+                                            <label class="form-check-label" for="yeast"><i>Saccharomyces
+                                                    cerevisiae</i></label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="species" value="ecoli"
+                                                id="ecoli">
+                                            <label class="form-check-label" for="ecoli"><i>Escherichia coli</i></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <p><b>Select localization of interest:</b></p>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="location"
+                                                value="cytoplasm" id="cytoplasm">
+                                            <label class="form-check-label" for="cytoplasm">Cytoplasm</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="location"
+                                                value="membrane" id="membrane">
+                                            <label class="form-check-label" for="membrane">Membrane</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="location"
+                                                value="secreted" id="secreted">
+                                            <label class="form-check-label" for="secreted">Secreted</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="positions" class="col-sm-2 col-form-label" data-toggle="tooltip"
+                                            data-placement="bottom"
+                                            title="List of residues to mutate. Residues are identified with its position in the sequence starting at 1. The list should contain integers and/or ranges defined with '-', such as: 1-4,7,9-20"><b>Positions:</b>
+                                            <i class="fa fa-question-circle"></i> </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="col-md-6 form-control" name="positions"
+                                                id="positions" placeholder="(e.g.) 1-4,8,10-12">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="add_feat"
+                                                id="add_feat" value="add_feat">
+                                            <label class="form-check-label" for="add_feat"><b>Include additional
+                                                    features</b> (may improve the model accuracy)</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <p><i>Note: Including more than two positions may require a few minutes if the input sequence is long (>100 amino acids).</i></p>
+                                        <p><i>Note 2: This function may return an error when using the Heroku-hosted version of the app, as there is a memory limit. Try with a sequence of 11 amino acids and mutating only 2 positions.</i></p>
+                                    </div>
+                                    <div class="form-group">
+                                        <input class="btn btn-primary" type="submit" value="Predict">
+                                        <input class="btn btn-outline-primary" type="reset" value="Reset">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 pt-5">
+                <a href='/'>Go back to home page</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script>
+    // Make the class active on the navbar
+    var nav_item = document.getElementById("nav_home");
+    nav_item.classList.add("active");
+    // Select same values as before by default
+    var nav_item = document.getElementById("{{prev_species}}");
+    nav_item.checked = true;
+    var nav_item = document.getElementById("{{prev_loc}}");
+    nav_item.checked = true;
+    // python True is not equal to JS true, so we need this comparision
+    if ("{{prev_add_feats}}" == "True") {
+        var nav_item = document.getElementById("add_feat");
+        nav_item.checked = true;
+    }
+
+</script>
+
+{% endblock %}

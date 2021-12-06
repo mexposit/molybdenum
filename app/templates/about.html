@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block page_title %}LMPM guide{% endblock %}
+{% block content %}
+
+<main role="main">
+    <div id="accordion">
+        <div class="container">
+            <div class="row pt-5">
+                <div class="col-md-12">
+
+                    <h1>About</h1>
+
+                    <p>Lean, Mean, Protein Machine (LMPM) is based on a machine learning model that predicts protein localization from protein sequence.
+                        To develop this model, we used data from <code>UniProt</code>, converted protein sequences to unified representations with UniRep and used <code>sklearn</code> to train the model. You can find the <code>jupyter notebooks</code> used to train the model in our <a href="https://github.com/Lean-Mean-Protein-Machine-Learning/LMPM">github repository</a>.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Data collection</h2>
+                    <p>Amino acid sequence data was collected from the UniProt database, through a series of search queries.  For each expression-cell specified, datasets were curated from a union of results from 'organism' queries, as well as 'host' queries (Fig 1a).  Host queries were included for the purpose of allowing viral proteins to reside in the datasets, as this would provide a more broadly-spanning representative basis for a predictive model applied to designer-proteins, relative to a model trained on native proteins alone.  While specification of signal-peptide is not required, it is included as an optional specifier for the human cell expression model (Fig 1b), and leads to slightly higher predictive accuracy if a given sequence is already known to contain a signal peptide.
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/about_fig1.png"
+                                alt="data sources">
+                        </div>
+                    </div>
+                    <p>Classification of proteins localized to the cytoplasm, membranes, or extracellular spaces was performed through a set-union of query results between annotation specification and gene oncology specifications (Fig 2a).  Logical negation between localization queries was applied to the acquired data in order to avoid proteins occurring in more than one localization set (fig 2b).
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/about_fig2.png"
+                                alt="data sources">
+                        </div>
+                    </div>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Unirep representation</h2>
+                    <p>In order to encode all sequences of varying-lengths into a standard data-type, 1900-element vectors were produced using the UniRep transfer-learning paradigm [1,2].  While the UniRep mLSTM was originally implemented in Tensorflow, we sought to minimize dependencies in our predictive model, in order to make our technology more accessible to users.  Following the mLSTM architecture presented in a Jax-based UniRep implementation [3], we rewrote the mLSTM entirely in Numpy, which was used to perform the necessary matrix multiplication operations using the original globally-trained UniRep weights presented by Alley et al.
+                    </p>
+                    
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Machine Learning models</h2>
+                    <p>After obtaining the UniRep representations for each sequence in each dataset (human, yeast, and E. coli), we compared the supervised learning classifiers. We used default parameters for each of seven classifiers: k-nearest neighbors, logistic regression, random forests, MLP (neural network), adaptive boosting, support vector machine with radial kernel, and support vector machine with linear kernel. We performed 5-fold cross-validation on each of these and plotted the initial accuracies for each organism.</p>
+                    <p>The logistic regression, random forest, and linear support vector machine classifiers showed the best results, so we optimized their parameters with 5-fold cross-validation once again. We selected the best parameters that balanced the AUROC and accuracy scores.</p>
+                    <p>Finally, we decided to train the random forests model with default parameters because it gave the best accuracy, interpretability, and feature weights. We liked how training the random forest model was not computationally heavy like the support vector machine. We also preferred its flexibility and methods for dealing with variations in the UniRep representations over logistic regression. We trained the final models on each organism with a randomly-selected 80% of the data.</p>
+                    <p>In order to better refine the models, we attempted to incorporate additional features into the model, such as isoelectric point, transmembrane insertion potential, and secondary structure percentages. However, after running the model with all of the additional features, we found that only the transmembrane insertion potential contributed the most. Thus, we created a second round of models that appended transmembrane insertion potentials into the UniRep representations as features. These models were also set with default parameters in random forests, trained on randomly-selected 80% of the data. </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Citations</h2>
+                    <ol>
+                        <li>Alley, Ethan C., Grigory Khimulya, Surojit Biswas, Mohammed AlQuraishi, and George M. Church. "Unified rational protein engineering with sequence-based deep representation learning." Nature methods 16, no. 12 (2019): 1315-1322.</li>
+                        <li>Biswas, Surojit, Grigory Khimulya, Ethan C. Alley, Kevin M. Esvelt, and George M. Church. "Low-N protein engineering with data-efficient deep learning." BioRxiv (2020).</li>
+                        <li>Ma, Eric, and Arkadij Kummer. "Reimplementing Unirep in JAX." bioRxiv (2020).</li>
+                        <li>Hessa, T., Meindl-Beinker, N., Bernsel, A. et al. Molecular code for transmembrane-helix recognition by the Sec61 translocon. Nature 450, 1026–1030 (2007). <a href="https://doi.org/10.1038/nature06387">https://doi.org/10.1038/nature06387</a> (to calculate the transmembrane insertion potential)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+
+
+<!-- Make the class active on the navbar -->
+<script>
+    var nav_item = document.getElementById("nav_about");
+    nav_item.classList.add("active");
+</script>
+
+{% endblock %}

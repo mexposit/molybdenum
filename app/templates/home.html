@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block page_title %}LMPM home{% endblock %}
+{% block content %}
+
+
+
+<main role="main" id="main">
+	<div class="container px-4 py-5">
+		<h2 class="pb-2 border-bottom">Model builder</h2>
+
+		<div class="row" style='height: 600px'>
+			<div id="graph" class='p-0' style='border:1px solid black;'>
+				<div id="toolbox">
+					<input type="file" id="hidden-file-upload"><input id="upload-input" type="image"
+						title="upload graph" src="upload-icon.png" alt="upload graph"> <input type="image"
+						id="download-input" title="download graph" src="download-icon.png" alt="download graph"> <input
+						type="image" id="delete-graph" title="delete graph" src="trash-icon.png" alt="delete graph">
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+	<div class="container px-4 py-5">
+		<div class="row">
+			<h2 class="pb-2 border-bottom">Parameter specs</h2>
+		</div>
+
+		<!-- <form>
+			<div class="mb-3">
+				<label for="exampleInputEmail1" class="form-label">Email address</label>
+				<input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+				<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+			</div>
+			<div class="mb-3">
+				<label for="exampleInputPassword1" class="form-label">Password</label>
+				<input type="password" class="form-control" id="exampleInputPassword1">
+			</div>
+			<div class="mb-3 form-check">
+				<input type="checkbox" class="form-check-input" id="exampleCheck1">
+				<label class="form-check-label" for="exampleCheck1">Check me out</label>
+			</div>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form> -->
+
+		<form id="modelParameters">
+			<div class="accordion accordion-flush" id="accordionFlushExample">
+				<div class="accordion-item">
+					<h2 class="accordion-header" id="flush-headingOne">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+							Species
+						</button>
+					</h2>
+					<div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+						data-bs-parent="#accordionFlushExample">
+						<div class="accordion-body" id="formSpeciesContent">
+							<!-- Insert here the content of species based on this id, delete all below -->
+							<!-- <div class="mb-3">
+								<label for="exampleInputEmail1" class="form-label">Email address</label>
+								<input type="email" class="form-control" id="exampleInputEmail1"
+									aria-describedby="emailHelp">
+								<div id="emailHelp" class="form-text">We'll never share your email with anyone else.
+								</div>
+							</div>
+							<div class="mb-3">
+								<label for="exampleInputPassword1" class="form-label">Password</label>
+								<input type="password" class="form-control" id="exampleInputPassword1">
+							</div>
+							<div class="mb-3 form-check">
+								<input type="checkbox" class="form-check-input" id="exampleCheck1">
+								<label class="form-check-label" for="exampleCheck1">Check me out</label>
+							</div> -->
+						</div>
+					</div>
+				</div>
+				<div class="accordion-item">
+					<h2 class="accordion-header" id="flush-headingTwo">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+							Reactions
+						</button>
+					</h2>
+					<div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo"
+						data-bs-parent="#accordionFlushExample">
+						<div class="accordion-body" id="form-reactions-content">
+							<!-- Here insert reaction information, each element is a subform -->
+							<div class="mb-3">
+								<label for="exampleInputPassword1" class="form-label">Password</label>
+								<input type="password" class="form-control" id="exampleInputPassword1">
+							</div>
+							<div class="mb-3 form-check">
+								<input type="checkbox" class="form-check-input" id="exampleCheck1">
+								<label class="form-check-label" for="exampleCheck1">Check me out</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- <div class="accordion-item">
+			  <h2 class="accordion-header" id="flush-headingThree">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+				  Simulation parameters
+				</button>
+			  </h2>
+			  <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
+				<div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the <code>.accordion-flush</code> class. This is the third item's accordion body. Nothing more exciting happening here in terms of content, but just filling up the space to make it look, at least at first glance, a bit more representative of how this would look in a real-world application.</div>
+			  </div>
+			</div> -->
+			</div>
+
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+
+	</div>
+
+	<script src="//d3js.org/d3.v3.js" charset="utf-8"></script>
+	<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
+	<script src="{{ url_for('static', filename='src/graph-creator.js') }}"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+	<script>
+		// here using the change event which fires after moving focus away from form input
+		// else use input or keyon to change everytime anything is typed
+		// VERY HELPFUL: https://eloquentjavascript.net/2nd_edition/18_forms.html
+
+		function updateForm() {
+			console.log("Form update");
+			// var text = $(this).val();
+			$.ajax({
+				url: "/background_process_test",
+				type: "get",
+				//   data: {jsdata: text}, //pass in form information?
+				success: function (response) {
+					$("#formSpeciesContent").html(response);
+				},
+				error: function (xhr) {
+					//Do Something to handle error
+				}
+			});
+		};
+		// initialize form
+		$(document).ready(updateForm);
+		// update it with every change in the graph
+		// $("#graph").mouseup(updateForm);
+		// $("#graph").keyup(updateForm);
+		// $("#graph").mouseout(updateForm);
+		$("#graph").mousedown(updateForm);
+		$("#graph").mouseup(updateForm);
+		$("#graph").click(updateForm);
+		$("#graph").mouseover(updateForm);
+		$("#graph").mouseout(updateForm);
+
+		// refresh every time a new value is added to the form
+		$("#modelParameters").change(updateForm);
+
+
+		// $("#main").keyup(function () {
+		// 	console.log("HELO");
+		// 	$.ajax({
+		// 		url: "/background_process_test",
+		// 		type: "get",
+		// 		//   data: {jsdata: text}, //pass in form information?
+		// 		success: function (response) {
+		// 			$("#formSpeciesContent").html(response);
+		// 		},
+		// 		error: function (xhr) {
+		// 			//Do Something to handle error
+		// 		}
+		// 	});
+		// });
+
+
+	</script>
+
+</main>
+
+{% endblock %}

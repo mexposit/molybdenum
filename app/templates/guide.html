@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block page_title %}LMPM guide{% endblock %}
+{% block content %}
+
+<main role="main">
+    <div id="accordion">
+        <div class="container">
+            <div class="row pt-5">
+                <div class="col-md-12">
+
+                    <h1>User guide</h1>
+
+                    <p>Lean, Mean, Protein Machine (LMPM) is a suite of machine learning algorithms to assist protein
+                        designers in experiments involving protein expression. This interactive online web app
+                        facilitates its usage and is complementary to our python module, <a
+                            href="https://github.com/Lean-Mean-Protein-Machine-Learning/LMPM">lmpm</a>.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Overview</h2>
+                    <p>Proteins can be secreted into the media, expressed on the membrane or remain in the cytoplasm.
+                        The localization of a protein can be different depending on the species. Since the localization
+                        of the protein is key for its function, protein designers need to make sure expressed proteins
+                        are present in the localization of interest.</p>
+                    <p>Our machine learning model predicts protein localization from its sequence, thus helping protein
+                        designers in their experiments. More details about the model can be found on our <a
+                            href="/about">about</a> page.</p>
+                    <p>The web app offers two main functions:</p>
+                    <ul>
+                        <li><b>Predict protein localization:</b> predict the most likely localization of a protein given
+                            its sequence. It also predicts the probability that the protein is predicted at the target
+                            localization.</li>
+                        <li><b>Improve protein sequence for a target localization:</b> mutate the protein sequence in
+                            certain positions and visualize how each mutation affects the probability the protein is
+                            localized at the target localization. This function can only be accessed once the first
+                            function has been run.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Predict protein localization</h2>
+                    <p>This function is available from the bottom of the <a href="/#predictor_container">home page</a>.
+                        The user enters one amino acid sequence of interest in the text box. As specified in the
+                        informative box, the sequence can either be in single-letter amino acid format (<i>e.g.</i>
+                        ALYN) or in three-letter format (<i>e.g.</i> AlaLeuTyrAsp). Caps are not important, but the
+                        sequence must not contain any symbol not corresponding to an amino acid. Bad inputs will prompt
+                        an error specifying where the error is. There is an example sequence pre-loaded in case the user
+                        wants to try out the web app.</p>
+                    <p>After defining the input sequence, the user must select one organism and one localization of
+                        interest. Even if only one localization or organism are selected, all the probabilities are
+                        available on the results page in form of a table.</p>
+                    <p>The user has the option to include the calculation of $\Delta G$ as an additional feature to
+                        improve the accuracy of the model slightly. This computation does not require a significant
+                        amount of extra time and increases the accuracy of the model.</p>
+                    <p>This is how the input form looks like if filled out properly:</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_input.png"
+                                alt="input form to predict localization">
+                        </div>
+                    </div>
+                    <p>Upon pressing the <code>Predict</code> button, the web app featurizes the input sequence and uses
+                        the model corresponding to the selected organism to predict the localization probability. This
+                        process is generally fast (&lt;1 minute), but can take up more time if the input sequence is
+                        long.</p>
+                    <p>The results show the predicted probability that the protein is found on the target localization.
+                        The probability value ranges from 0% to 100% and indicates the confidence the model has that the
+                        protein is secreted in that localization. The probability alone does not have much informative
+                        value. It is only useful to comparing the probability of being to that localization versus the
+                        probability of being in another localization. Thus, the second line of the results shows the
+                        localization that has the highest probability for the input sequence and selected organism. In
+                        this case, the probability of being in the cytoplasm is the highest, so the second line and
+                        visual figure indicates that the most likely localization in <i>H. sapiens</i> is cytoplasm.</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_results.png"
+                                alt="results form to predict localization">
+                        </div>
+                    </div>
+                    <p>Details such as the query and the probabilities for all organisms and all localizations can be
+                        accessed by toggling the collapsable menu below the image.</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_resultsdetail.png"
+                                alt="results form to predict localization in detail">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 pt-4">
+                    <h2>Improve protein sequence</h2>
+                    <p>This function is available from the results page after predicting the localization of a target
+                        protein. The user can access it by expanding the collapsible menu
+                        "<code>Mutate sequence to improve the localization score</code>". The form is very
+                        similar to the previous case. Note that at this point the user is able to modify the target
+                        location or organism, since after seeing the results the user may find it more useful to
+                        optimize the
+                        sequence for a different localization than initially planned.</p>
+                    <p>In addition to the fields of the previous form, this one includes a "<code>Positions</code>"
+                        field.
+                        This field determines the residues of the protein sequence to mutate. Valid values include
+                        integers and
+                        ranges of integers, similar to: <code>1,4-7,9,14</code>. The selected positions will be mutated
+                        for each
+                        of the possible amino acid residues.
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_improve.png"
+                                alt="input form to the improvement function">
+                        </div>
+                    </div>
+                    <p>The results are displayed in the form of a heatmap. The heatmap indicates the increase (red) or
+                        decrease (blue) in probability that the
+                        protein is expressed in the target localization. This visualization can help the user decide
+                        what mutations to incorporate in the protein sequence
+                        in order to improve its expression in the target localization.
+                    </p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_improve_result.png"
+                                alt="results form to predict localization in detail, heatmap">
+                        </div>
+                    </div>
+                    <p>In addition to the graphic visualization, the page returns the list of top 15 mutations that
+                        increase further the probability of getting the target localization.</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_improve_result2.png"
+                                alt="results form to predict localization in detail, table">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="#FAQs">
+                <div class="col-md-12 pt-4">
+                    <h2 class="pb-3">FAQs</h2>
+                    <p><b>What if I get an error when I try to make predictions?</b>
+                    <p>Our web app detects the errors just like our python module and returns a clear message indicating
+                        what caused the error. Go back or contact us to fix it. For instance, if you used a sequence
+                        with non-valid amino acids you would get the following error page:</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 px-0">
+                            <img class="img-fluid" height=50px, src="static/img/guide_error.png"
+                                alt="error caused by introducing non-valid amino acid characters">
+                        </div>
+                    </div>
+                    <p><b>What if my target species is neither <i>E. coli</i>, <i>S. cerevisiae</i>, nor <i>H.
+                                sapiens</i>?</b>
+                    <p>So far, our model has only been trained for these three species, which are very common in protein
+                        expression experiments. As a rough estimate, you can use <i>E. coli</i> for any bacterial
+                        species, <i>H. sapiens</i> for mammalian cells, and <i>S. cerevisiae</i> for any other
+                        eukaryotic cell. Note, however, that the predicted localization my depend between species, so
+                        the accuracy that our model has for the target species cannot be guaranteed in other species.
+                        We are planning on incorporating more model species such as <i>Drosophila melanogaster</i> or
+                        <i>Mus musculus</i> into the set of models we have.
+                    </p>
+                    <p><b>What if the web app is not able to process my sequence?</b>
+                    <p class="mb-0">Currently, the web app is hosted in a free Heroku dyno that only offers 500Mb of RAM. The
+                        initial Docker image with the minimum environment required to run the app is already close to that limit,
+                        so the web app crashes when using long sequences or trying to mutate more than two positions even in a short sequence.
+                        To try out the app, make predictions on amino acid sequences less than 14 amino acis. To try out the mutation function,
+                        make predictions on amino acid sequences less than 14 amino acids, not including additional features, and mutating only 2 residues of the protein.
+                        With this memory limitation, the best way to use the web app is locally. If you want to test the app locally, you need to have
+                        a working Docker installation (see <a href="https://docs.docker.com/get-docker/">Docker's website</a> for information on how to install Docker), log in to Docker hub and access <code>http://localhost:5000/</code>after running the following commands:</p>
+                        <p class="my-0 pl-3"><code>git clone https://github.com/Lean-Mean-Protein-Machine-Learning/LMPM.git</code></p>
+                        <p class="my-0 pl-3"><code>cd LMPM</code></p>
+                        <p class="my-0 pl-3"><code>docker build -t lmpm_web .</code></p>
+                        <p class="my-0 pl-3"><code>docker run -d -it -p 5000:5000 --name lmpm_image lmpm_web</code></p>
+                        <p>Note that the base image was obtained from docker, so building the container only takes 30 seconds and consumes about 500Mb of memory. The local version of the web app will not have any problems processing longer amino acid sequences.</p>
+
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+
+<!-- Make the class active on the navbar -->
+<script>
+    var nav_item = document.getElementById("nav_guide");
+    nav_item.classList.add("active");
+</script>
+
+{% endblock %}

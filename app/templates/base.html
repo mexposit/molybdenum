@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Favicon, it is DNA from fontawesome -->
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+
+  <!-- font awesome 4 icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Bootstrap CSS -->
+  <!--link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"-->
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap-5.0.2-dist/css/bootstrap.min.css') }}"/>
+  <!-- script src="{{ url_for('static', filename='assets/jquery-3.1.0.min.js') }}"></script -->
+  <script src="{{ url_for('static', filename='assets/bootstrap-5.0.2-dist/js/bootstrap.min.js') }}"></script>
+  <!-- <script src="{{ url_for('static', filename='assets/jsplumb.bundle.js') }}"></script> -->
+
+  <!-- Custom styles -->
+  <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+
+  <link href="{{ url_for('static', filename='src/graph-creator.css') }}" rel="stylesheet">
+
+  <title>{% block page_title %}{% endblock %}</title>
+
+</head>
+
+<body>
+
+
+  <!-- <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="{{ url_for('home') }}">
+      <img src="../static/img/LMPM_logo.png" height=25px, alt="LMPM logo">
+      LMPM
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" id='nav_home' href="{{ url_for('home') }}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id='nav_guide' href="{{ url_for('get_guide') }}">User guide</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id='nav_about' href="{{ url_for('get_about') }}">About</a>
+        </li>
+      </ul>
+    </div>
+  </nav> -->
+
+  {% block content %}{% endblock %}
+
+  <hr>
+  <!-- <footer class="container">
+
+    <div class="row">
+      <div class="col-md-6">
+        <p>&copy; UW 2021</p>
+      </div>
+      <div class="col-md-6">
+        <p class="text-right">Check our repo: <a href="https://github.com/Lean-Mean-Protein-Machine-Learning/LMPM"><img height=25px, src="static/img/githublogo.png"
+          alt="github logo"></a></p>
+      </div>
+    </div>
+  </footer> -->
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <!--script src="../static/assets/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script-->
+  <!-- <script>
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script> -->
+
+</body>
+
+</html>
