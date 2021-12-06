@@ -1,6 +1,6 @@
 import os, sys
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import numpy as np
 
 # to convert plot
@@ -42,61 +42,100 @@ def home():
     # print(model_data)
     return render_template("home.html")
 
-#background process happening without any refreshing
-@app.route('/background_process_test', methods=["GET","POST"])
-def background_process_test():
-    global conn_data
-    print('inside backgrounda nd model is\n', mb_model.todict())
+
+#background process triggered when graph has been updated
+@app.route('/updated_graph', methods=["GET","POST"])
+def updated_graph():
+    # conn_data = {'nodes':[],'edges':[]}
+    print(request.get_json())
+    # global conn_data
     if (request.is_json) and (request.method == "POST"):
         print("Graphical connection request")
         data_json = request.get_json()
         conn_data = data_json
-        print(conn_data)
     else:
         # got request from javascript that runs everytime screen is touched
-        print("Form update request")
-
-        # print("{} is {}".format(data_req, type(data_req)))
-        # print("{} is {}".format(data_json, type(data_json)))
-        # data_json2 = json.loads(request.get_json(silent=True, force=True))
-        # print("{} is {}".format(data_json2, type(data_json2)))
-        # print (request.json.keys())
-
-    # 1. Update underlying dictionary with new connection (use auxiliary function)
-    # 2. Build the form with updated values
-    # (somewhere different, not here, script that runs when form is updated)... update underlying dictionary. 
+        pass
     
-    # json_data = request.get_json(force=True, silent=True)
-    # a_value = json_data["name"]
-    # print("Hello", data_req)
-
-    # actually I think this may be more simple: https://stackoverflow.com/questions/40963401/flask-dynamic-data-update-without-reload-page/40964086
-    # if I go for this option I guess I need to figure out how to get the data from the form dinamically to update antimony model dinamically, whereas the other option should be able to do it. Maybe chedk https://www.youtube.com/watch?v=Lzj13QhRhzQ
-
-    # steps for next day:
-    # figure out if use option above or below
-    # then, create the shared dictonary having all the attributes we need for antimony model, basically see the one above as an example
-    # then, write function to update this dictionary with the json data that we received creating new nodes and connections as appropiate
-    # pass this dictionary to javascript again (or use the other form) to build the form, and keep infromation automatically into the dictionary.
-    
-    # run a function that looks at the connection graphs and updates the underlying
-    # dictionary containing all the information with new nodes, connections or others...
-    #then return the dictionary to javascript as a json so that
-    #the other javascript script creates the form, keeping the default values that are stored in dictionary
-    #that other javascript file will call another python function like this one that will keep parsing values
-    # and generating the antimony model in real tim
-    # model_dict = model_builder.init_model()
-
-    # global model_data
-    # only run it if model has been initialized
-    # if len(conn_data.keys()) != 0:
-        # model_data = model_builder.update_model_connect(model_data, conn_data, defaults)
-    # print(conn_data, model_data)
+    # update model information with updated connection data
     mb_model.update_from_graph(conn_data)
+    # pass model dictionary representation to update the form
     model_data = mb_model.todict()
     return render_template("model_form.html", model_data=model_data)
-    # print ("Hello")
-    # return ("nothing")
+
+#background process triggered when form has been updated
+@app.route('/updated_form', methods=["GET","POST"])
+def updated_form():
+    # get form as immutablemultidict
+    form_data = request.form
+    # convert it to a list of tuples (name, value) for each element
+    form_lists = (list(form_data.lists()))
+    # update background model
+    try:
+        mb_model.update_from_form(form_lists)
+    except Exception as e:
+        return jsonify(message=str(e)),500
+
+    model_data = mb_model.todict()
+    print(model_data)
+    return render_template("model_form.html", model_data=model_data)
+
+
+# #background process happening without any refreshing
+# @app.route('/background_process_test', methods=["GET","POST"])
+# def background_process_test():
+#     global conn_data
+#     print('inside backgrounda nd model is\n', mb_model.todict())
+#     if (request.is_json) and (request.method == "POST"):
+#         print("Graphical connection request")
+#         data_json = request.get_json()
+#         conn_data = data_json
+#         print(conn_data)
+#     else:
+#         # got request from javascript that runs everytime screen is touched
+#         print("Form update request")
+
+#         # print("{} is {}".format(data_req, type(data_req)))
+#         # print("{} is {}".format(data_json, type(data_json)))
+#         # data_json2 = json.loads(request.get_json(silent=True, force=True))
+#         # print("{} is {}".format(data_json2, type(data_json2)))
+#         # print (request.json.keys())
+
+#     # 1. Update underlying dictionary with new connection (use auxiliary function)
+#     # 2. Build the form with updated values
+#     # (somewhere different, not here, script that runs when form is updated)... update underlying dictionary. 
+    
+#     # json_data = request.get_json(force=True, silent=True)
+#     # a_value = json_data["name"]
+#     # print("Hello", data_req)
+
+#     # actually I think this may be more simple: https://stackoverflow.com/questions/40963401/flask-dynamic-data-update-without-reload-page/40964086
+#     # if I go for this option I guess I need to figure out how to get the data from the form dinamically to update antimony model dinamically, whereas the other option should be able to do it. Maybe chedk https://www.youtube.com/watch?v=Lzj13QhRhzQ
+
+#     # steps for next day:
+#     # figure out if use option above or below
+#     # then, create the shared dictonary having all the attributes we need for antimony model, basically see the one above as an example
+#     # then, write function to update this dictionary with the json data that we received creating new nodes and connections as appropiate
+#     # pass this dictionary to javascript again (or use the other form) to build the form, and keep infromation automatically into the dictionary.
+    
+#     # run a function that looks at the connection graphs and updates the underlying
+#     # dictionary containing all the information with new nodes, connections or others...
+#     #then return the dictionary to javascript as a json so that
+#     #the other javascript script creates the form, keeping the default values that are stored in dictionary
+#     #that other javascript file will call another python function like this one that will keep parsing values
+#     # and generating the antimony model in real tim
+#     # model_dict = model_builder.init_model()
+
+#     # global model_data
+#     # only run it if model has been initialized
+#     # if len(conn_data.keys()) != 0:
+#         # model_data = model_builder.update_model_connect(model_data, conn_data, defaults)
+#     # print(conn_data, model_data)
+#     mb_model.update_from_graph(conn_data)
+#     model_data = mb_model.todict()
+#     return render_template("model_form.html", model_data=model_data)
+#     # print ("Hello")
+#     # return ("nothing")
 
 @app.route("/predict", methods=["POST"])
 def load_seqs():

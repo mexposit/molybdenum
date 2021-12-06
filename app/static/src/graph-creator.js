@@ -25,15 +25,20 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       var jsonModel = modelToJson(thisGraph);
       $.ajax({
         type: "POST", // HTTP method POST or GET
-        contentType: 'application/json; charset=utf-8', //content type
-        url: '/background_process_test', //Where to make Ajax calls
-        dataType:'json', // Data type, HTML, json etc.
+        contentType: 'application/json; charset=utf-8', //type that is sent
+        dataType:'html', // expected receive type to determine success
+        url: '/updated_graph', // where to make Ajax calls
         processData: false,
-        data:JSON.stringify(jsonModel)
+        data:JSON.stringify(jsonModel), //get model in json
+        success: function (response) {
+					// update form
+					$("#modelParameters").html(response);
+				},
+				error: function (xhr) {
+          console.log("Did not receive correct data type to update form")
+				}
       });
     };
-
-
 
     // define graphcreator object
     var GraphCreator = function(svg, nodes, edges){
@@ -539,8 +544,8 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       switch(d3.event.keyCode) {
       case consts.BACKSPACE_KEY:
       case consts.DELETE_KEY:
-        d3.event.preventDefault();
         if (selectedNode){
+          d3.event.preventDefault();
           thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
           thisGraph.spliceLinksForNode(selectedNode);
           state.selectedNode = null;
@@ -548,6 +553,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           console.log('UPDATE delete node');
           transferJson(thisGraph);
         } else if (selectedEdge){
+          d3.event.preventDefault();
           thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
           state.selectedEdge = null;
           thisGraph.updateGraph();

@@ -44,70 +44,7 @@
 		</form> -->
 
 		<form id="modelParameters">
-			<div class="accordion accordion-flush" id="accordionFlushExample">
-				<div class="accordion-item">
-					<h2 class="accordion-header" id="flush-headingOne">
-						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-							data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-							Species
-						</button>
-					</h2>
-					<div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
-						data-bs-parent="#accordionFlushExample">
-						<div class="accordion-body" id="formSpeciesContent">
-							<!-- Insert here the content of species based on this id, delete all below -->
-							<!-- <div class="mb-3">
-								<label for="exampleInputEmail1" class="form-label">Email address</label>
-								<input type="email" class="form-control" id="exampleInputEmail1"
-									aria-describedby="emailHelp">
-								<div id="emailHelp" class="form-text">We'll never share your email with anyone else.
-								</div>
-							</div>
-							<div class="mb-3">
-								<label for="exampleInputPassword1" class="form-label">Password</label>
-								<input type="password" class="form-control" id="exampleInputPassword1">
-							</div>
-							<div class="mb-3 form-check">
-								<input type="checkbox" class="form-check-input" id="exampleCheck1">
-								<label class="form-check-label" for="exampleCheck1">Check me out</label>
-							</div> -->
-						</div>
-					</div>
-				</div>
-				<div class="accordion-item">
-					<h2 class="accordion-header" id="flush-headingTwo">
-						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-							data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
-							Reactions
-						</button>
-					</h2>
-					<div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo"
-						data-bs-parent="#accordionFlushExample">
-						<div class="accordion-body" id="form-reactions-content">
-							<!-- Here insert reaction information, each element is a subform -->
-							<div class="mb-3">
-								<label for="exampleInputPassword1" class="form-label">Password</label>
-								<input type="password" class="form-control" id="exampleInputPassword1">
-							</div>
-							<div class="mb-3 form-check">
-								<input type="checkbox" class="form-check-input" id="exampleCheck1">
-								<label class="form-check-label" for="exampleCheck1">Check me out</label>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- <div class="accordion-item">
-			  <h2 class="accordion-header" id="flush-headingThree">
-				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
-				  Simulation parameters
-				</button>
-			  </h2>
-			  <div id="flush-collapseThree" class="accordion-collapse collapse" aria-labelledby="flush-headingThree" data-bs-parent="#accordionFlushExample">
-				<div class="accordion-body">Placeholder content for this accordion, which is intended to demonstrate the <code>.accordion-flush</code> class. This is the third item's accordion body. Nothing more exciting happening here in terms of content, but just filling up the space to make it look, at least at first glance, a bit more representative of how this would look in a real-world application.</div>
-			  </div>
-			</div> -->
-			</div>
-
+			<!-- Insert here the content of species based on this id, delete all below -->
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 
@@ -124,36 +61,79 @@
 		// else use input or keyon to change everytime anything is typed
 		// VERY HELPFUL: https://eloquentjavascript.net/2nd_edition/18_forms.html
 
-		function updateForm() {
-			console.log("Form update");
-			// var text = $(this).val();
+		// This one is just used first time to update the form with empty graph
+		function initForm() {
+			console.log("Initialize form");
 			$.ajax({
-				url: "/background_process_test",
-				type: "get",
-				//   data: {jsdata: text}, //pass in form information?
+				url: "/updated_graph",
+				type: "POST",
+				// pass in a string that represents the empty graph
+        		contentType: 'application/json; charset=utf-8',
+				data: '{"nodes":[],"edges":[]}',
 				success: function (response) {
-					$("#formSpeciesContent").html(response);
+					// update form
+					$("#modelParameters").html(response);
 				},
 				error: function (xhr) {
-					//Do Something to handle error
+					// no error possible since expected data type is not specified
 				}
 			});
 		};
+
+		//to trigger if form has been updated
+		function updatedForm() {
+			//get data from the form
+			var form_data = $('form').serialize();
+			$.ajax({
+				url: "/updated_form",
+				type: "POST",
+				data: form_data, //pass in form information
+				success: function (response) {
+					// nothing to do, just updated internal representation
+					// TODO: must update parameters, maybe could only update them not all form to avoid disruptions
+					$("#modelParameters").html(response);
+					// so I could not have this here but the parameters which are in the form would only be updated
+					// when updating the graph, and this would be a problem as you see changes in internal model
+					// but not in the form surface...! so a solution to avoid updating everything may be only
+					// subsetting the parameters and updating only the site of the parameters, should be easy... but would require another template for only the parameters
+				},
+				error: function (request, status, error) {
+					// TODO: color cell in red or something with javascript and insert error message
+        			console.log("Error\n" + request.responseJSON.message);
+				}
+			});
+		};
+
 		// initialize form
-		$(document).ready(updateForm);
-		// update it with every change in the graph
-		// $("#graph").mouseup(updateForm);
-		// $("#graph").keyup(updateForm);
-		// $("#graph").mouseout(updateForm);
-		$("#graph").mousedown(updateForm);
-		$("#graph").mouseup(updateForm);
-		$("#graph").click(updateForm);
-		$("#graph").mouseover(updateForm);
-		$("#graph").mouseout(updateForm);
+		$(document).ready(initForm);
+		// // update it with every change in the graph
+		// // $("#graph").mouseup(updateForm);
+		// // $("#graph").keyup(updateForm);
+		// // $("#graph").mouseout(updateForm);
+		// $("#graph").mousedown(updatedGraph);
+		// $("#graph").mouseup(updatedGraph);
+		// $("#graph").click(updatedGraph);
+		// $("#graph").mouseover(updatedGraph);
+		// $("#graph").mouseout(updatedGraph);
 
-		// refresh every time a new value is added to the form
-		$("#modelParameters").change(updateForm);
+		// trigger updatedForm every time a new value is added to the form
+		$("#modelParameters").change(updatedForm);
 
+		// function updateForm() {
+		// 	console.log("Form update");
+		// 	// var text = $(this).val();
+		// 	$.ajax({
+		// 		url: "/background_process_test",
+		// 		type: "get",
+		// 		//data: {jsdata: text}, //pass in form information
+		// 		success: function (response) {
+		// 			$("#modelParameters").html(response);
+		// 		},
+		// 		error: function (xhr) {
+		// 			//Do Something to handle error
+		// 		}
+		// 	});
+		// };
 
 		// $("#main").keyup(function () {
 		// 	console.log("HELO");

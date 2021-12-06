@@ -347,6 +347,16 @@ class ModelRepresentation(object):
             # this ignores it in terms of affecting the model
             warnings.warn(f'Warning, connection {source, target} is not between a species and a reaction')
         return None
+
+    def is_float(self, element):
+        """
+        Helper function, returns True if string can be converted to float
+        """
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
     
     def get_reac_params(self):
         """
@@ -357,7 +367,7 @@ class ModelRepresentation(object):
         """
         import re
         # define mathematical characters to split the expression into
-        math_chars = '[+\-*\[\]\(\)\s,;^]'
+        math_chars = '[+\-*/\[\]\(\)\s,;^]'
         # initialize parameter list
         param_list = []
         
@@ -370,6 +380,9 @@ class ModelRepresentation(object):
                     pass
                 elif val in [spec['name'] for spec in self.species.values()]:
                     # value is actually a specie, not a parameter
+                    pass
+                elif self.is_float(val):
+                    # value is an integer/float modifying one parameter
                     pass
                 else:
                     # only possible alternative is that value is a parameter
@@ -466,7 +479,60 @@ class ModelRepresentation(object):
             self.add_connection(edge_info['source'], edge_info['target'])
             
         # update parameters
-        self.update_parameters()      
+        self.update_parameters()
+
+        return None
+
+
+    def update_from_form(self, form_list):
+        for form_input in form_list:
+            try:
+                info, value = form_input
+            except:
+                raise ValueError(f'Invalid form input: "{form_input}" should be a two-element tuple')
+            # info further divided into component id and assigned attribute
+            try:
+                comp_id, att = info.split('_')
+            except:
+                raise ValueError(f'Invalid component or attribute: "{info}" has zero or more than one "_" signs, exactly one required')
+            # value should only have one element
+            if len(value) != 1:
+                raise ValueError(f'Invalid form input: {value} should only be one element')
+            value = value[0]
+            # find component_id in species, reactions or params, find attribute and assign or raise error
+            if comp_id in self.species.keys():
+                try:
+                    if att == 'amt':
+                        self.species[comp_id][att] = float(value)
+                    elif att == 'fixed':
+                        self.species[comp_id][att] = bool(value)
+                    else:
+                        raise ValueError(f'Unrecognized attribute {att} in {form_input}')
+                except:
+                    raise TypeError(f'Attribute {att} in {form_input} does not match with expected type')
+            elif comp_id in self.reactions.keys():
+                try:
+                    if att == 'expression':
+                        self.reactions[comp_id][att] = str(value)
+                        # update parameters after adding any expression
+                        self.update_parameters()
+                    else:
+                        raise ValueError(f'Unrecognized attribute {att} in {form_input}')
+                except:
+                    raise TypeError(f'Attribute {att} in {form_input} does not match with expected type')
+            elif comp_id in self.params.keys():
+                try:
+                    if att == 'name':
+                        self.params[comp_id][att] = str(value)
+                    elif att == 'val':
+                        self.params[comp_id][att] = float(value)
+                    else:
+                        raise ValueError(f'Unrecognized attribute {att} in {form_input}')
+                except:
+                    raise TypeError(f'Attribute {att} in {form_input} does not match with expected type')
+            else:
+                # do not raise error. Previous form might contain a parameter that has been deleted and this would not be found in the keys
+                pass
         
         return None
 

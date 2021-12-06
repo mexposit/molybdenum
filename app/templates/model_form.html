@@ -1,29 +1,121 @@
-<form>
-    <table class="table caption-top table-sm table-hover">
-        <caption>List of species, you can edit their values</caption>
-        <thead class="table-light">
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Initial amount</th>
-                <th scope="col">Fixed?</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for spec in model_data.species.values() %}
-            <tr>
-                <td>{{ spec['name'] }}</td>
-                <td><input type="text" class="form-control" value="{{ spec['amt'] }}"></td>
-                <!-- add class position-static if it does not have a label -->
-                <td>
-                    <input type="checkbox" class="form-check-input position-static" id="exampleCheck1" {{ "checked" if spec['fixed'] }}>
-                    <!-- <label class="form-check-label" for="exampleCheck1">Check me out</label> -->
-                </td>
-            </tr>
-            {% endfor %}
-            <tr>
-        </tbody>
-    </table>
-</form>
+<!-- <form> -->
+<div class="accordion accordion-flush" id="accordionFlushExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                Species
+            </button>
+        </h2>
+        <!-- adding .show makes it open by default -->
+        <div id="flush-collapseOne" class="accordion-collapse collapse show" aria-labelledby="flush-headingOne">
+            <!-- ignoring data-bs-parent allows it to stay open -->
+            <!-- data-bs-parent="#accordionFlushExample"> -->
+            <div class="accordion-body" id="formSpeciesContent">
+                <table class="table caption-top table-sm table-hover">
+                    <caption>List of species, you can edit their values</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Initial amount</th>
+                            <th scope="col">Fixed?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for spec_id, spec in model_data.species.items() %}
+                        <tr>
+                            <td>{{ spec['name'] }}</td>
+                            <td><input type="text" class="form-control" name="{{ spec_id }}_amt" value="{{ spec['amt'] }}"></td>
+                            <!-- add class position-static if it does not have a label -->
+                            <td>
+                                <input type="checkbox" class="form-check-input position-static" id="exampleCheck1" name="{{ spec_id }}_fixed" value="True" 
+                                    {{ "checked" if spec['fixed'] }}>
+                                <!-- <label class="form-check-label" for="exampleCheck1">Check me out</label> -->
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingTwo">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                Reactions
+            </button>
+        </h2>
+        <!-- adding .show makes it open by default -->
+        <div id="flush-collapseTwo" class="accordion-collapse collapse show" aria-labelledby="flush-headingTwo">
+        <!-- ignoring data-bs-parent allows it to stay open -->
+        <!-- data-bs-parent="#accordionFlushExample"> -->
+            <div class="accordion-body" id="form-reactions-content">
+                <table class="table caption-top table-sm table-hover">
+                    <caption>List of reactions, you can edit their values</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Reagents</th>
+                            <th scope="col">Products</th>
+                            <th scope="col">Expression</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reac_id, reac in model_data.reactions.items() %}
+                        <tr>
+                            <td>{{ reac['name'] }}</td>
+                            <td>{{ reac['reagents'] }}</td>
+                            <td>{{ reac['products'] }}</td>
+                            <td><input type="text" class="form-control" name="{{ reac_id }}_expression" value="{{ reac['expression'] }}"></td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingThree">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                Parameters
+            </button>
+        </h2>
+        <!-- adding .show makes it open by default -->
+        <div id="flush-collapseThree" class="accordion-collapse collapse show" aria-labelledby="flush-headingThree">
+            <!-- ignoring data-bs-parent allows it to stay open -->
+            <!-- data-bs-parent="#accordionFlushExample"> -->
+            <div class="accordion-body" id="form-params-content">
+                <table class="table caption-top table-sm table-hover">
+                    <caption>List of parameters, you can edit their values</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for param_id, par in model_data.params.items() %}
+                        <tr>
+                            <td>{{ par['name'] }}</td>
+                            <!-- parameter names can't still be updated changing the reaction -->
+                            <!-- <td><input type="text" class="form-control" name="{{ param_id }}_name" value="{{ par['name'] }}"></td> -->
+                            <td><input type="text" class="form-control" name="{{ param_id }}_val" value="{{ par['val'] }}"></td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- </form> -->
+
 
 
 <!-- With the help of: https://stackoverflow.com/questions/40963401/flask-dynamic-data-update-without-reload-page/40964086 -->
