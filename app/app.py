@@ -14,6 +14,8 @@ from bs4 import BeautifulSoup
 #import lmpm
 #import lmpm.unirep as unirep
 sys.path.append("/")
+# for local development
+# sys.path.append("/home/mexposit/telmb/")
 from molybdenum import MolybdenumModel
 
 app = Flask(__name__)
@@ -92,26 +94,35 @@ def update_representation():
     # except Exception as e:
         # return jsonify(message=str(e)),500
     try:
+        print("TRying")
         antimony_rep = mb_model.toAntimony()
         sbml_rep = mb_model.toSBMLstr()
         molybdenum_rep = mb_model.todict()
         # if compilation of model was successful set success status
         status = 'success'
         error_message = '' # empty error message
-        # and keep model representations
-        model_reps = (antimony_rep, sbml_rep, molybdenum_rep)
+        print("Succedded")
     except Exception as e:
+        print("Failed")
         # if there was a compilation error (because model is not ok)
         status = 'error'
         # keep error message and pass it
         error_message = str(e)
         # fill model representations with an error note
         error_note='Model compilation failed, check errors'
-        model_reps = (error_note, error_note, error_note)
+        antimony_rep = error_note
+        sbml_rep = error_note
+        molybdenum_rep = error_note
+    # antimony_rep = mb_model.toAntimony()
+    # sbml_rep = mb_model.toSBMLstr()
+    # molybdenum_rep = mb_model.todict()
+    # # if compilation of model was successful set success status
+    # status = 'success'
+    # error_message = '' # empty error message
+
         # this generates error in console. We handle error, we don't want error in console
         # return jsonify(message=str(e)),500
-
-    return render_template("form_representation.html", model_reps=model_reps), error_message, status
+    return jsonify([status, error_message, antimony_rep, sbml_rep, str(molybdenum_rep)])
 
 
 #background process triggered to update model representations

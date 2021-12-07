@@ -22,6 +22,10 @@ docker run -d -it -p 5000:5000 --name telmb_image telmb_web
 docker exec -ti telmb_image pip freeze
 
 docker run -d -it -p 5000:5000 --mount type=bind,source="$(pwd)"/app,target=/app --name telmb_imagemnt telmb_web
+
+Alternative to mount both modules and run interactively
+
+docker run -t -p 5000:5000 -v "$(pwd)"/app:/app -v "$(pwd)"/molybdenum:/molybdenum --name telmb_imagemnt telmb_web
 ```
 
 Next steps:

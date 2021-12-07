@@ -12,8 +12,10 @@
 			<div id="graph" class='p-0' style='border:1px solid black;'>
 				<div id="toolbox">
 					<input type="file" id="hidden-file-upload">
-					<button type="submit" id="download-input" class="btn btn-outline-secondary "><i class="fa fa-download"></i>  Download graph</button>
-					<button type="submit" id="delete-graph" class="btn btn-outline-secondary"><i class="fa fa-trash"></i>  Delete graph</button>
+					<button type="submit" id="download-input" class="btn btn-outline-secondary "><i
+							class="fa fa-download"></i> Download graph</button>
+					<button type="submit" id="delete-graph" class="btn btn-outline-secondary"><i
+							class="fa fa-trash"></i> Delete graph</button>
 					<!-- <input id="upload-input" type="image" title="upload graph" src="upload-icon.png" alt="upload graph">
 					<input type="image" id="download-input" title="download graph" src="download-icon.png"
 						alt="download graph">
@@ -29,23 +31,6 @@
 			<h2 class="pb-2 border-bottom">Parameter specs</h2>
 		</div>
 
-		<!-- <form>
-			<div class="mb-3">
-				<label for="exampleInputEmail1" class="form-label">Email address</label>
-				<input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-				<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-			</div>
-			<div class="mb-3">
-				<label for="exampleInputPassword1" class="form-label">Password</label>
-				<input type="password" class="form-control" id="exampleInputPassword1">
-			</div>
-			<div class="mb-3 form-check">
-				<input type="checkbox" class="form-check-input" id="exampleCheck1">
-				<label class="form-check-label" for="exampleCheck1">Check me out</label>
-			</div>
-			<button type="submit" class="btn btn-primary">Submit</button>
-		</form> -->
-
 		<form id="modelParameters">
 			<!-- Insert here the content of species based on this id, delete all below -->
 		</form>
@@ -54,9 +39,9 @@
 
 	<!-- Don't show error panel by default -->
 	<div class="container px-4 py-5" display="none" id="modelErrorsContainer">
-		<!-- <div class="row">
+		<div class="row">
 			<h2 class="pb-2 border-bottom">Errors</h2>
-		</div> -->
+		</div>
 		<div class="accordion accordion-flush" id="modelErrors">
 			<div class="accordion-item">
 				<h2 class="accordion-header" id="ModErr-HeadingOne">
@@ -65,8 +50,8 @@
 						Errors
 					</button>
 				</h2>
-				<div id="ModErr-collapseOne" class="accordion-collapse collapse show" aria-labelledby="ModErr-HeadingOne"
-					data-bs-parent="#modelErrors">
+				<div id="ModErr-collapseOne" class="accordion-collapse collapse show"
+					aria-labelledby="ModErr-HeadingOne" data-bs-parent="#modelErrors">
 					<div class="accordion-body" id="form-ModErr-antimony-content">
 						<div class="row">
 							<div class="col-sm">
@@ -85,9 +70,49 @@
 		<div class="row">
 			<h2 class="pb-2 border-bottom">Model representations</h2>
 		</div>
-		<form id="modelRepresentations">
-			<!-- Insert here model representations -->
-		</form>
+
+
+		<div class="accordion accordion-flush" id="accordionModelRepresentation">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="ModRep-HeadingOne">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						data-bs-target="#ModelRep-collapseOne" aria-expanded="false" aria-controls="ModelRep-collapseOne">
+						Model representations
+					</button>
+				</h2>
+				<div id="ModelRep-collapseOne" class="accordion-collapse collapse show" aria-labelledby="ModRep-HeadingOne"
+					data-bs-parent="#accordionModelRepresentation">
+					<div class="accordion-body" id="form-ModelRep-antimony-content">
+						<div class="row">
+							<div class="col-sm">
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">Antimony</span>
+									</div>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="AntimonyModelRepresentation"></textarea>
+								</div>
+							</div>
+							<div class="col-sm">
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">SBML</span>
+									</div>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="SBMLModelRepresentation"></textarea>
+								</div>
+							</div>
+							<div class="col-sm">
+								<div class="input-group">
+									<div class="input-group-prepend">
+										<span class="input-group-text">Molybdenum</span>
+									</div>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="MolybdenumModelRepresentation"></textarea>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div class="container px-4 py-5">
@@ -192,7 +217,7 @@
 
 
 	</div>
-	
+
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
 	<script src="{{ url_for('static', filename='assets/bootstrap-5.0.2-dist/js/bootstrap.min.js') }}"></script>
@@ -201,7 +226,7 @@
 	<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
 	<script src="{{ url_for('static', filename='src/graph-creator.js') }}"></script>
 
-	
+
 
 	<script>
 		// here using the change event which fires after moving focus away from form input
@@ -254,50 +279,61 @@
 		//to trigger if form has been updated, update representations
 		function updateRepresent() {
 			//get data from the form
-			var form_data = $('#modelParameters').serialize();
+			// var form_data = $('#modelParameters').serialize();
 			$.ajax({
 				url: "/update_representation",
 				type: "POST",
-				data: form_data, //pass in form information
-				success: function (model_rep_html, error_message, status) {
-					console.log("Entered sucess with status", status)
+				// data: form_data, //pass in form information
+				success: function (response) {
+					var response_array = response;
+					var status = response_array[0];
+					var error_message = response_array[1];
+					var antimony_rep = response_array[2];
+					var sbml_rep = response_array[3];
+					var molybdenum_rep = response_array[4];
+					// status, error_message, antimony_rep, sbml_rep, molybdenum_rep = stre
 					// success just means we received the response
 					if (status == "success") {
-						console.log('correct ompi');
 						// model compilation was correct
 						// remove error message if there was any
 						$("#modelErrorText").html("");
 						// hide error display
 						$('#modelErrorsContainer').hide();
 						// add model representations
-						$("#modelRepresentations").html(model_rep_html);
+						// add model representations that are now an error message
+						$("#AntimonyModelRepresentation").html(antimony_rep);
+						$("#SBMLModelRepresentation").html(sbml_rep);
+						$("#MolybdenumModelRepresentation").html(molybdenum_rep);
 						// remove invalid color from text representations
-						if($('.model-rep-textarea').hasClass('is-invalid')){
+						if ($('.model-rep-textarea').hasClass('is-invalid')) {
 							$('.model-rep-textarea').removeClass('is-invalid')
 						}
 					} else if (status == "error") {
-						console.log('not compilation ompi');
 						// model did not compile, show error
 						// show error block
 						$('#modelErrorsContainer').show();
 						// fill in error message
 						$("#modelErrorText").html(error_message);
-						// add model representations even if they are incorrect
-						$("#modelRepresentations").html(model_rep_html);
+						// add model representations that are now an error message
+						$("#AntimonyModelRepresentation").html(antimony_rep);
+						$("#SBMLModelRepresentation").html(sbml_rep);
+						$("#MolybdenumModelRepresentation").html(molybdenum_rep);
+						// $("#modelRepresentations").html(model_rep_html);
 						// color model representations as invalid
-						if($('.model-rep-textarea').hasClass('is-invalid')){
-						}else{
+						if ($('.model-rep-textarea').hasClass('is-invalid')) {
+						} else {
 							$('.model-rep-textarea').addClass('is-invalid')
 						}
 					} else {
 						console.log("Error updating representation");
-					}		
-
-				},
-				error: function (request, status, error) {
-					console.log('got error');
-					// errors are handled in success to print errors and other messages
+					}
 				}
+				// },
+				// error: function (xhr) {
+				// 	console.log(xhr);
+				// 	console.log('got error');
+				// 	// errors are handled in success to print errors and other messages
+				// }
 			});
 		};
 
