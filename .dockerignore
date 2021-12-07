@@ -1,0 +1,5 @@
+/notebooks
+/docs
+.git
+.gitignore
+*__pycache__*
