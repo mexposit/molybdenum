@@ -3,10 +3,7 @@ import os, sys
 from flask import Flask, render_template, request, jsonify
 import numpy as np
 
-# to convert plot
-import io
-import base64
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from bs4 import BeautifulSoup
 
 
 
@@ -47,10 +44,8 @@ def home():
 @app.route('/updated_graph', methods=["GET","POST"])
 def updated_graph():
     # conn_data = {'nodes':[],'edges':[]}
-    print(request.get_json())
     # global conn_data
     if (request.is_json) and (request.method == "POST"):
-        print("Graphical connection request")
         data_json = request.get_json()
         conn_data = data_json
     else:
@@ -77,8 +72,51 @@ def updated_form():
         return jsonify(message=str(e)),500
 
     model_data = mb_model.todict()
-    print(model_data)
     return render_template("model_form.html", model_data=model_data)
+
+
+#background process triggered to update model representations
+@app.route('/update_representation', methods=["GET","POST"])
+def update_representation():
+
+    # TODO: Maybe make it so that the user can edit the model
+    # The best way to edit the model would be add the writeup of simpleSBML, which makes it very easy, more than others!
+    # get model parameter form as immutablemultidict
+    # form_data = request.form
+    # convert it to a list of tuples (name, value) for each element
+    # form_lists = (list(form_data.lists()))
+    # update background model
+    # try:
+        # mb_model.update_from_form(form_lists)
+    # except Exception as e:
+        # return jsonify(message=str(e)),500
+
+    antimony_rep = mb_model.toAntimony()
+    sbml_rep = mb_model.toSBMLstr()
+    molybdenum_rep = mb_model.todict()
+    return render_template("form_representation.html", model_reps=(antimony_rep, sbml_rep, molybdenum_rep))
+
+
+#background process triggered to update model representations
+@app.route('/run_model', methods=["GET","POST"])
+def run_model():
+    # get simulation parameters as immutablemultidict
+    form_data = request.form
+    # convert it to a list of tuples (name, value) for each element
+    form_lists = (list(form_data.lists()))
+    # TODO: check that end is > start, or let antimony raise error if this is the case
+    # update background model
+    try:
+        mb_model.update_sim_params(form_lists)
+    except Exception as e:
+        return jsonify(message=str(e)),500
+    te_model = mb_model.run()
+    te_plot_img = mb_model.get_plot_as_htmlimage(te_model)
+    # use beautifulsoup to add the class="img-fluid" to the image to make it responsive with bootstrap
+    soup = BeautifulSoup(te_plot_img, 'html.parser')
+    soup.find("img")['class'] = "img-fluid"
+    return str(soup)
+
 
 
 # #background process happening without any refreshing

@@ -536,3 +536,56 @@ class ModelRepresentation(object):
         
         return None
 
+    def update_sim_params(self, sim_param):
+        # get dictionary from form
+        form_dict = {}
+        for form_input in sim_param:
+            try:
+                param, value = form_input
+            except:
+                raise ValueError(f'Invalid form input: "{form_input}" should be a two-element tuple')
+            if len(value) != 1:
+                raise ValueError(f'Invalid form input: {value} should only be one element')
+            value = value[0]
+            if (param == 'sim_start') or (param == 'sim_end'):
+                try:
+                    form_dict[param] = float(value)
+                except:
+                    raise ValueError(f'Value for "sim_start" and "sim_end" must be integer or float, but got {type(value)} for {param}')
+            elif (param == 'sim_points'):
+                try:
+                    form_dict[param] = int(value)
+                except:
+                    raise ValueError(f'Value for "sim_points" must be integer, but got {type(value)}')
+            else:
+                raise ValueError(f'Unrecognized simulation parameter {param}, must be one of "sim_start", "sim_end" or "sim_points"')
+
+        # then set sim_param to that dictionary
+        self.sim_params = form_dict.copy()
+
+        return None
+
+    def run(self):
+        import tellurium as te
+
+        temodel = te.loada(self.toAntimony())
+        temodel.simulate(
+            start=self.sim_params['sim_start'],
+            end=self.sim_params['sim_end'],
+            points=self.sim_params['sim_points']
+        )
+        return temodel
+
+    def get_plot_as_htmlimage(self, temodel):
+        """
+        Requires model to be simulated previously
+        """
+        import io, base64
+
+        io_str = io.BytesIO()
+        temodel.plot(dpi=300, savefig=io_str, format='jpg')
+        io_str.seek(0)
+        s = base64.b64encode(io_str.getvalue()).decode("utf-8").replace("\n", "")
+        img_str = f'<img align="center" src="data:image/png;base64,{s}">'
+
+        return img_str
