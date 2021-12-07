@@ -13,7 +13,8 @@ from bs4 import BeautifulSoup
 # when using locally
 #import lmpm
 #import lmpm.unirep as unirep
-from molybdenum import ModelRepresentation
+sys.path.append("/")
+from molybdenum import MolybdenumModel
 
 app = Flask(__name__)
 
@@ -25,7 +26,7 @@ defaults = {
 
 
 # initialize empty molybdenum model
-mb_model = ModelRepresentation()
+mb_model = MolybdenumModel()
 
 # # initialize a dictionary that will keep all model information
 # model_data = model_builder.init_model()
@@ -90,11 +91,27 @@ def update_representation():
         # mb_model.update_from_form(form_lists)
     # except Exception as e:
         # return jsonify(message=str(e)),500
+    try:
+        antimony_rep = mb_model.toAntimony()
+        sbml_rep = mb_model.toSBMLstr()
+        molybdenum_rep = mb_model.todict()
+        # if compilation of model was successful set success status
+        status = 'success'
+        error_message = '' # empty error message
+        # and keep model representations
+        model_reps = (antimony_rep, sbml_rep, molybdenum_rep)
+    except Exception as e:
+        # if there was a compilation error (because model is not ok)
+        status = 'error'
+        # keep error message and pass it
+        error_message = str(e)
+        # fill model representations with an error note
+        error_note='Model compilation failed, check errors'
+        model_reps = (error_note, error_note, error_note)
+        # this generates error in console. We handle error, we don't want error in console
+        # return jsonify(message=str(e)),500
 
-    antimony_rep = mb_model.toAntimony()
-    sbml_rep = mb_model.toSBMLstr()
-    molybdenum_rep = mb_model.todict()
-    return render_template("form_representation.html", model_reps=(antimony_rep, sbml_rep, molybdenum_rep))
+    return render_template("form_representation.html", model_reps=model_reps), error_message, status
 
 
 #background process triggered to update model representations
@@ -272,9 +289,8 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     # use this when running in the website (heroku) or as local web app
-    #port = int(os.environ.get("PORT", 5000))
-    #app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
     # instead, comment lines above and uncomment below  if you run it as
     # flask app to debug (specifying port explicity is important for debugging)
-    app.run(debug=True,host='0.0.0.0',port=5000)
-    # app.run(debug=True)
+    # app.run(debug=True,host='0.0.0.0',port=5000)

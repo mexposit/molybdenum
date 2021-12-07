@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block page_title %}LMPM home{% endblock %}
+{% block page_title %}Molybdenum home{% endblock %}
 {% block content %}
 
 
@@ -50,6 +50,35 @@
 			<!-- Insert here the content of species based on this id, delete all below -->
 		</form>
 
+	</div>
+
+	<!-- Don't show error panel by default -->
+	<div class="container px-4 py-5" display="none" id="modelErrorsContainer">
+		<!-- <div class="row">
+			<h2 class="pb-2 border-bottom">Errors</h2>
+		</div> -->
+		<div class="accordion accordion-flush" id="modelErrors">
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="ModErr-HeadingOne">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						data-bs-target="#ModErr-collapseOne" aria-expanded="false" aria-controls="ModErr-collapseOne">
+						Errors
+					</button>
+				</h2>
+				<div id="ModErr-collapseOne" class="accordion-collapse collapse show" aria-labelledby="ModErr-HeadingOne"
+					data-bs-parent="#modelErrors">
+					<div class="accordion-body" id="form-ModErr-antimony-content">
+						<div class="row">
+							<div class="col-sm">
+								<p id="modelErrorText">
+									<!-- Insert here error if there is any -->
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div class="container px-4 py-5">
@@ -163,12 +192,16 @@
 
 
 	</div>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+	<script src="{{ url_for('static', filename='assets/bootstrap-5.0.2-dist/js/bootstrap.min.js') }}"></script>
 
 	<script src="//d3js.org/d3.v3.js" charset="utf-8"></script>
 	<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
 	<script src="{{ url_for('static', filename='src/graph-creator.js') }}"></script>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	
 
 	<script>
 		// here using the change event which fires after moving focus away from form input
@@ -226,12 +259,44 @@
 				url: "/update_representation",
 				type: "POST",
 				data: form_data, //pass in form information
-				success: function (response) {
-					$("#modelRepresentations").html(response);
+				success: function (model_rep_html, error_message, status) {
+					console.log("Entered sucess with status", status)
+					// success just means we received the response
+					if (status == "success") {
+						console.log('correct ompi');
+						// model compilation was correct
+						// remove error message if there was any
+						$("#modelErrorText").html("");
+						// hide error display
+						$('#modelErrorsContainer').hide();
+						// add model representations
+						$("#modelRepresentations").html(model_rep_html);
+						// remove invalid color from text representations
+						if($('.model-rep-textarea').hasClass('is-invalid')){
+							$('.model-rep-textarea').removeClass('is-invalid')
+						}
+					} else if (status == "error") {
+						console.log('not compilation ompi');
+						// model did not compile, show error
+						// show error block
+						$('#modelErrorsContainer').show();
+						// fill in error message
+						$("#modelErrorText").html(error_message);
+						// add model representations even if they are incorrect
+						$("#modelRepresentations").html(model_rep_html);
+						// color model representations as invalid
+						if($('.model-rep-textarea').hasClass('is-invalid')){
+						}else{
+							$('.model-rep-textarea').addClass('is-invalid')
+						}
+					} else {
+						console.log("Error updating representation");
+					}		
+
 				},
 				error: function (request, status, error) {
-					// TODO: color cell in red or something with javascript and insert error message
-					console.log("Error\n" + request.responseJSON.message);
+					console.log('got error');
+					// errors are handled in success to print errors and other messages
 				}
 			});
 		};

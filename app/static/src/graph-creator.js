@@ -4,7 +4,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     // TODO add user settings
     // weird, the name of consts must be the same to later identify it...
     var consts = {
-      defaultTitle: "random variable"
+      defaultTitle: "random"
     };
     var settings = {
       //HTML element to build upon
@@ -184,6 +184,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
               thisGraph.updateGraph();
               console.log('UPDATE upload file');
               transferJson(thisGraph);
+              updateRepresent();
             }catch(err){
               window.alert("Error parsing uploaded file\nerror message: " + err.message);
               return;
@@ -250,6 +251,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         thisGraph.updateGraph();
         console.log('UPDATE deleted plot');
         transferJson(thisGraph);
+        updateRepresent();
       }
     };
   
@@ -405,6 +407,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
               d3.select(this.parentElement).remove();
               //also update json here with new name
               transferJson(thisGraph);
+              updateRepresent();
             });
       return d3txt;
     };
@@ -438,6 +441,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           thisGraph.updateGraph();
           console.log('UPDATE circle MouseUp');
           transferJson(thisGraph);
+          updateRepresent();
         }
       } else{
         // we're in the same node
@@ -501,6 +505,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         thisGraph.selectElementContents(txtNode);
         txtNode.focus();
         transferJson(thisGraph);
+        updateRepresent();
       } else if (state.graphMouseDown && d3.event.ctrlKey){
         // if control key was pressed add reaction type of node (modify d=)
         // clicked not dragged from svg
@@ -521,6 +526,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         thisGraph.selectElementContents(txtNode);
         txtNode.focus();
         transferJson(thisGraph);
+        updateRepresent();
       } else if (state.shiftNodeDrag){
         // dragged from node
         state.shiftNodeDrag = false;
@@ -552,6 +558,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           thisGraph.updateGraph();
           console.log('UPDATE delete node');
           transferJson(thisGraph);
+          updateRepresent();
         } else if (selectedEdge){
           d3.event.preventDefault();
           thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
@@ -559,6 +566,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           thisGraph.updateGraph();
           console.log('UPDATE delete edge');
           transferJson(thisGraph);
+          updateRepresent();
         }
         break;
       }
@@ -715,6 +723,5 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     var graph = new GraphCreator(svg, nodes, edges);
         graph.setIdCt(1);
     graph.updateGraph();
-    console.log('UPDATE First pass');
     // transferJson(graph);
   })(window.d3, window.saveAs, window.Blob);

@@ -1,1 +1,1 @@
-from .model_builder import ModelRepresentation
+from .molybdenum import MolybdenumModel

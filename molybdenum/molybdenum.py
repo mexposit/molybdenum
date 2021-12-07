@@ -31,7 +31,7 @@ def create_ids(mb_model):
     return node_to_id
 
 
-class ModelRepresentation(object):
+class MolybdenumModel(object):
     def __init__(self):
         self.species = dict()
         self.reactions = dict()
@@ -260,7 +260,7 @@ class ModelRepresentation(object):
             
         return new_spec
      
-    def init_reac(self, name, reagents=[], products=[], expression=''):
+    def init_reac(self, name, reagents=[], products=[], expression='undefined'):
         try:
             new_reac = {'name': str(name),
                         'reagents': list(reagents),
@@ -443,7 +443,7 @@ class ModelRepresentation(object):
             new_id = self.get_new_id('reactions')
             # get name defined in graph, this is always one element as ids are unique
             name = [node['title'] for node in graph_rep['nodes'] if node['id'] == new_node_id][0]
-            # add the new species
+            # add the new reaction
             self.reactions[new_id] = self.init_reac(name)
             # add relation between new node and new id
             self.node_to_id[new_node_id] = new_id
@@ -477,7 +477,6 @@ class ModelRepresentation(object):
         # then refill it
         for edge_info in graph_rep['edges']:
             self.add_connection(edge_info['source'], edge_info['target'])
-            
         # update parameters
         self.update_parameters()
 
