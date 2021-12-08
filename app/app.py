@@ -7,9 +7,9 @@ from bs4 import BeautifulSoup
 
 
 # when using in heroku/docker
-sys.path.append("/")
+# sys.path.append("/")
 # for local development in flask
-# sys.path.append("/home/mexposit/telmb/")
+sys.path.append("/home/mexposit/telmb/")
 from molybdenum import MolybdenumModel
 
 app = Flask(__name__)
@@ -294,8 +294,8 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     # use this when running in the website (heroku) or as local web app
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host="0.0.0.0", port=port)
     # instead, comment lines above and uncomment below  if you run it as
     # flask app to debug (specifying port explicity is important for debugging)
-    # app.run(debug=True,host='0.0.0.0',port=5000)
+    app.run(debug=True,host='0.0.0.0',port=5000)

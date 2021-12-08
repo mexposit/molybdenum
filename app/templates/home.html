@@ -114,9 +114,9 @@
 		</div>
 
 	</div>
-	<div class="container px-4 py-5">
+	<div class="container px-4 	">
 		<div class="row">
-			<h2 class="pb-2 border-bottom">Parameter specs</h2>
+			<h2 class="pb-2">Parameter specs</h2>
 		</div>
 
 		<form id="modelParameters">
@@ -126,10 +126,10 @@
 	</div>
 
 	<!-- Don't show error panel by default -->
-	<div class="container px-4 py-5" display="none" id="modelErrorsContainer">
-		<div class="row">
+	<div class="container px-4" display="none" id="modelErrorsContainer">
+		<!-- <div class="row">
 			<h2 class="pb-2 border-bottom">Errors</h2>
-		</div>
+		</div> -->
 		<div class="accordion accordion-flush" id="modelErrors">
 			<div class="accordion-item">
 				<h2 class="accordion-header" id="ModErr-HeadingOne">
@@ -154,10 +154,10 @@
 		</div>
 	</div>
 
-	<div class="container px-4 py-5">
-		<div class="row">
+	<div class="container px-4 py-2">
+		<!-- <div class="row">
 			<h2 class="pb-2 border-bottom">Model representations</h2>
-		</div>
+		</div> -->
 
 
 		<div class="accordion accordion-flush" id="accordionModelRepresentation">
@@ -208,8 +208,11 @@
 	</div>
 
 	<div class="container px-4 py-5">
-		<div class="row">
+		<!-- <div class="row">
 			<h2 class="pb-2 border-bottom">Simulation parameters</h2>
+		</div> -->
+		<div class="row">
+			<h2 class="pb-2 border-bottom">Run model</h2>
 		</div>
 		<form id="simParams">
 			<!-- Insert here the input for simulation parameters -->
@@ -268,20 +271,20 @@
 		</form>
 	</div>
 
-	<div class="container px-4 py-5">
-		<div class="row">
+	<div class="container px-4">
+		<!-- <div class="row">
 			<h2 class="pb-2 border-bottom">Run model</h2>
-		</div>
-		<div class="accordion accordion-flush" id="SimParamsAccordion">
+		</div> -->
+		<div class="accordion accordion-flush" id="RunModAccordion">
 			<div class="accordion-item">
-				<h2 class="accordion-header" id="simparm-headingOne">
+				<h2 class="accordion-header" id="runmod-headingOne">
 					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-						data-bs-target="#simparm-collapseOne" aria-expanded="false" aria-controls="simparm-collapseOne">
+						data-bs-target="#runmod-collapseOne" aria-expanded="false" aria-controls="runmod-collapseOne">
 						Run model and view results
 					</button>
 				</h2>
-				<div id="simparm-collapseOne" class="accordion-collapse collapse show"
-					aria-labelledby="simparm-headingOne">
+				<div id="runmod-collapseOne" class="accordion-collapse collapse show"
+					aria-labelledby="runmod-headingOne">
 					<div class="accordion-body" id="form-species-content">
 						<div class="row mb-3 justify-content-center">
 							<div class="col-md text-center">
@@ -290,12 +293,12 @@
 							</div>
 						</div>
 
-						<div class="row mb-3">
+						<!-- <div class="row mb-3">
 							<div class="col-md">
 								<h3>Model results</h3>
 							</div>
 
-						</div>
+						</div> -->
 						<div class="row mb-3 justify-content-center">
 							<div class="col-md-5" id="ModelPlot">
 								<!-- Flask inserts here the graphic produced when running the model -->
