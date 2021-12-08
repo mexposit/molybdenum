@@ -5,9 +5,97 @@
 
 
 <main role="main" id="main">
-	<div class="container px-4 py-5">
-		<h2 class="pb-2 border-bottom">Model builder</h2>
+	<!-- Main jumbotron for title -->
+	<div class="jumbotron">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3">
+					<img src="../static/img/mb_black.png" class="img-fluid" alt="Molybdenum orbitals">
+				</div>
+				<div class="col-md-9">
 
+					<div class="container">
+						<div class="row">
+							<div class="col-md-12 p-5">
+								<h1 class="display-3">Molybdenum,<br> a model builder for tellurium</h1>
+								<p style="font-size:1.5rem; font-weight:300">Helping system biologists build models
+									since 2021.</p>
+							</div>
+						</div>
+					</div>
+					<div class="container">
+						<div class="row justify-content-end">
+							<div class="col-md-5">
+								<a class="btn btn-secondary btn-lg" href="#ModelBuilderCont" role="button">Try it
+									&raquo;</a>
+								<a class="btn btn-outline-secondary btn-lg" href="{{ url_for('get_about') }}"
+									role="button">Learn
+									more
+									&raquo;</a>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+			<div class="row">
+
+
+			</div>
+		</div>
+	</div>
+
+	<div class="container px-4 py-5" id="ModelBuilderCont">
+		<h2 class="pb-1">Model builder</h2>
+		<div class="container px-2 py-2" id="Instructions">
+			<!-- <div class="dropdown">
+				<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+				  Instructions
+				</button>
+				<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+					<li>Shift+click to insert a species node</li>
+					<li>Ctrl+click to insert a reaction node</li>
+					<li>Shift+click on a node and drag to another to connect them</li>
+					<li>Shift+click on a node to rename it</li>
+					<li>Click on node or connection and press backspace/delete to delete</li>
+				</ul>
+			  </div> -->
+
+			<div class="accordion" id="graphInstructions">
+				<div class="accordion-item">
+					<h2 class="accordion-header" id="instruction-HeadingOne">
+						<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#instruction-collapseOne" aria-expanded="false"
+							aria-controls="instruction-collapseOne">
+							Legend and instructions
+						</button>
+					</h2>
+					<div id="instruction-collapseOne" class="accordion-collapse collapse"
+						aria-labelledby="instruction-HeadingOne" data-bs-parent="#graphInstructions">
+						<div class="accordion-body" id="form-instruction-content">
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="row">
+										<div class="col-md-4"><img src="../static/img/species_represent_transp.png" class="img-fluid" alt="Species representation"></div>
+										<div class="col-md-4"><img src="../static/img/reactions_represent_transp.png" class="img-fluid" alt="Reactions representation"></div>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<ul>
+										<li>Shift+click to insert a species node</li>
+										<li>Ctrl+click to insert a reaction node</li>
+										<li>Shift+click on a node and drag to another to connect them</li>
+										<li>Shift+click on a node to rename it</li>
+										<li>Click on node or connection and press backspace/delete to delete</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="row" style='height: 600px'>
 			<div id="graph" class='p-0' style='border:1px solid black;'>
 				<div id="toolbox">
@@ -76,12 +164,13 @@
 			<div class="accordion-item">
 				<h2 class="accordion-header" id="ModRep-HeadingOne">
 					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-						data-bs-target="#ModelRep-collapseOne" aria-expanded="false" aria-controls="ModelRep-collapseOne">
+						data-bs-target="#ModelRep-collapseOne" aria-expanded="false"
+						aria-controls="ModelRep-collapseOne">
 						Model representations
 					</button>
 				</h2>
-				<div id="ModelRep-collapseOne" class="accordion-collapse collapse show" aria-labelledby="ModRep-HeadingOne"
-					data-bs-parent="#accordionModelRepresentation">
+				<div id="ModelRep-collapseOne" class="accordion-collapse collapse show"
+					aria-labelledby="ModRep-HeadingOne" data-bs-parent="#accordionModelRepresentation">
 					<div class="accordion-body" id="form-ModelRep-antimony-content">
 						<div class="row">
 							<div class="col-sm">
@@ -89,7 +178,8 @@
 									<div class="input-group-prepend">
 										<span class="input-group-text">Antimony</span>
 									</div>
-									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="AntimonyModelRepresentation"></textarea>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea"
+										id="AntimonyModelRepresentation"></textarea>
 								</div>
 							</div>
 							<div class="col-sm">
@@ -97,7 +187,8 @@
 									<div class="input-group-prepend">
 										<span class="input-group-text">SBML</span>
 									</div>
-									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="SBMLModelRepresentation"></textarea>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea"
+										id="SBMLModelRepresentation"></textarea>
 								</div>
 							</div>
 							<div class="col-sm">
@@ -105,7 +196,8 @@
 									<div class="input-group-prepend">
 										<span class="input-group-text">Molybdenum</span>
 									</div>
-									<textarea class="form-control model-rep-textarea" aria-label="With textarea" id="MolybdenumModelRepresentation"></textarea>
+									<textarea class="form-control model-rep-textarea" aria-label="With textarea"
+										id="MolybdenumModelRepresentation"></textarea>
 								</div>
 							</div>
 						</div>
@@ -205,7 +297,7 @@
 
 						</div>
 						<div class="row mb-3 justify-content-center">
-							<div class="col-md" id="ModelPlot">
+							<div class="col-md-5" id="ModelPlot">
 								<!-- Flask inserts here the graphic produced when running the model -->
 							</div>
 						</div>
@@ -423,6 +515,12 @@
 		// });
 
 
+	</script>
+
+	<!-- Make the class active on the navbar -->
+	<script>
+		var nav_item = document.getElementById("nav_home");
+		nav_item.classList.add("active");
 	</script>
 
 </main>

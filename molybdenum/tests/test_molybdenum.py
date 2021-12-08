@@ -275,6 +275,19 @@ end
         # model should have one boundary condition if this is the case
         self.assertIn('boundaryCondition="true"', str(mbmodel.tosimpleSbml()))
 
+        # try passing in a model where a species name is NOT preceeded by $
+        # but fixed is set to true, sbml should get it
+        mod_model = self.example_mbmodel.copy()
+        mod_model["species"] = {
+            "spec1": {"name": "E", "amt": 5e-21, "fixed": True},
+            "spec2": {"name": "S", "amt": 1e-20, "fixed": False},
+            "spec3": {"name": "ES", "amt": 0.0, "fixed": False},
+            "spec4": {"name": "P", "amt": 0.0, "fixed": False},
+        }
+        mbmodel.loadm(mod_model)
+        # model should have one boundary condition if this is the case
+        self.assertIn('boundaryCondition="true"', str(mbmodel.tosimpleSbml()))
+
     def test_toSBMLstr(self):
         mbmodel = MolybdenumModel()
         mbmodel.loadm(self.example_mbmodel)

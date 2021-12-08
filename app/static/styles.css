@@ -1,0 +1,88 @@
+body {
+    padding-top: 3.5rem;
+}
+
+.navbar-brand{
+    margin-left: 1rem
+}
+
+.jumbotron {
+    padding: 2rem 1rem;
+    margin-bottom: 1rem;
+    background-color: #e9ecef;
+    border-radius: .3rem;
+  }
+
+#instruction-HeadingOne > .accordion-button.collapsed{
+  background-color: rgb(248, 248, 248)
+}
+
+/* Adjust graph styles */
+marker{
+    fill: #333;
+}
+
+g.species circle{
+    /* Original white color */
+    /* fill: #F6FBFF; */
+    fill: #abd6fa;
+    stroke: #333;
+    stroke-width: 2px;
+}
+
+g.reactions circle{
+    fill: #F49F93;
+    stroke: #333;
+    stroke-width: 2px;
+    /* This transform would make reaction circles a bit smaller but */
+    /* arrows in edges are not adjusted for this, so it does not look great */
+    /* transform:scale(0.8, 0.8); */
+}
+
+g.species:hover circle{
+    stroke: #333;
+    stroke-width: 4px;
+}
+
+g.reactions:hover circle{
+    stroke: #333;
+    stroke-width: 4px;
+}
+
+
+
+g.selected circle{
+    stroke: #333;
+    stroke-width: 7px;
+    /* to have dashes if selected */
+    /* stroke-dasharray: 10; */
+}
+g.selected:hover circle{
+    stroke: #333;
+    stroke-width: 7px;
+}
+
+path.link {
+    fill: none;
+    stroke: #333;
+    stroke-width: 6px;
+    cursor: default;
+}
+
+path.link:hover{
+    /* stroke: rgb(94, 196, 204); */
+    stroke-dasharray: 2;
+}
+
+/* g.connect-node circle{
+    fill: #BEFFFF;
+} */
+
+path.link.hidden{
+    stroke-width: 0;
+}
+
+path.link.selected {
+    /* stroke: rgb(229, 172, 247); */
+    stroke-dasharray: 2;
+}

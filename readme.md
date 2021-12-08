@@ -46,6 +46,15 @@ Alternative to mount both modules and run interactively
 docker run -t -p 5000:5000 -v "$(pwd)"/app:/app -v "$(pwd)"/molybdenum:/molybdenum --name telmb_imagemnt telmb_web
 ```
 
+For testing:
+
+Had to install pip `install coveralls`
+
+```
+....path...telmb$ coverage run -m unittest discover
+```
+
+
 Next steps:
 
  - Functions:

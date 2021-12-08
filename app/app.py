@@ -6,15 +6,9 @@ import numpy as np
 from bs4 import BeautifulSoup
 
 
-
-# another option would be installing it with pip
-# when using in heroku
-# sys.path.append("/molybdenum")
-# when using locally
-#import lmpm
-#import lmpm.unirep as unirep
+# when using in heroku/docker
 sys.path.append("/")
-# for local development
+# for local development in flask
 # sys.path.append("/home/mexposit/telmb/")
 from molybdenum import MolybdenumModel
 

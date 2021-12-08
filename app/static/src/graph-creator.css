@@ -67,7 +67,7 @@ marker{
     fill: #333;
 }
 
-g.conceptG circle{
+/* g.conceptG circle{
     fill: #F6FBFF;
     stroke: #333;
     stroke-width: 2px;
@@ -75,8 +75,8 @@ g.conceptG circle{
 
 g.conceptG:hover circle{
     fill: rgb(200, 238, 241);
-}
-
+} */
+/* 
 g.species circle{
     fill: #F6FBFF;
     stroke: #333;
@@ -117,4 +117,4 @@ path.link.hidden{
 
 path.link.selected {
     stroke: rgb(229, 172, 247);
-}
+} */
