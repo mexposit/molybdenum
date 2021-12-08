@@ -76,7 +76,7 @@ class MolybdenumModel(object):
         
     def tojson(self):
         """
-        In Json things are double quoted and false is in lowercase
+        In Json, things are double quoted and false is in lowercase
         """
         import json
         json_rep = json.dumps(self.todict())

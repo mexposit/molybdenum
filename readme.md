@@ -1,3 +1,16 @@
+
+For heroku:
+ 1. Create new app
+ 2. Set app so that it gets updated from github repository
+ 3. Select automatic updates.
+ 4. but at this point heroku tries to build a python app, this is a problem!
+ 5. Go to the terminal and do heroku login
+ 6. Then go to the github repository in the computer, once inside run
+ 7. heroku stack:set container -a telmb
+ 8. Now commit and push. Heroku now will understand it is a docker container app and will make use of heroku.yml.
+ 9. Information obtained from: https://stackoverflow.com/a/60159901
+
+
 ```
 # set up environment
 conda create -n telmb37 python=3.7.0
