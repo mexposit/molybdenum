@@ -1,6 +1,6 @@
 # Molybdenum model builder
 
-[![Coverage Status](https://coveralls.io/repos/github/mexposit/molybdenum/badge.svg)](https://coveralls.io/github/mexposit/molybdenum)
+[![Build Status](https://app.travis-ci.com/mexposit/molybdenum.svg?branch=main)](https://app.travis-ci.com/mexposit/molybdenum)
 [![Coverage Status](https://coveralls.io/repos/github/mexposit/molybdenum/badge.svg)](https://coveralls.io/github/mexposit/molybdenum)
 
 
