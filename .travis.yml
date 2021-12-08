@@ -20,7 +20,7 @@ branches:
 
 before_install:
   - python -m pip install --upgrade pip
-  - pip install codecov
+  - pip install coveralls
 
 # set up the environment
 install:
@@ -29,10 +29,10 @@ install:
     # - source activate testing-env
     # - conda install --yes coverage coveralls flake8 nose
 script:
-    - python molybdenum/tests/test_molybdenum.py
+    - coverage run -m python molybdenum/tests/test_molybdenum.py    
 
 after_success:
-    - codecov
+    - coveralls
 
 # run this before the main script
 # here to check if code in lmpm module is pep8 compilant
