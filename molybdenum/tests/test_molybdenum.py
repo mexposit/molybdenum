@@ -187,13 +187,60 @@ end
     ##################################
     def test_loadm(self):
         mbmodel = MolybdenumModel()
+        # load example model
         mbmodel.loadm(self.example_mbmodel)
+        # test if all values were assigned correctly
         self.assertEqual(mbmodel.species, self.example_species)
         self.assertEqual(mbmodel.reactions, self.example_react)
         self.assertEqual(mbmodel.params, self.example_param)
         self.assertEqual(mbmodel.sim_params, self.example_sim_param)
         self.assertEqual(mbmodel.node_to_id, self.example_node_to_id)
-        # self.assertRaises(ValueError, )
+        # test when passing a model without simparams but still get dictionary
+        mbmodel2 = MolybdenumModel()
+        example_model_nosim = self.example_mbmodel.copy()
+        example_model_nosim.pop("sim_params")
+        mbmodel2.loadm(example_model_nosim)
+        self.assertEqual(type(mbmodel2.sim_params), dict)
+        # test when passing model with already initialized node_to_id
+        mbmodel3 = MolybdenumModel()
+        mbmodel3.loadm(self.example_mbmodel_wnode)
+        self.assertEqual(mbmodel3.node_to_id, self.example_node_to_id)
+        # try passing models without required keys
+        mbmodel_fail = MolybdenumModel()
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail.pop("species")
+            mbmodel_fail.loadm(example_model_fail)
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail.pop("reactions")
+            mbmodel_fail.loadm(example_model_fail)
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail.pop("params")
+            mbmodel_fail.loadm(example_model_fail)
+        # pass incorrect kind of values for that keys
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail["species"] = ["A", "B", "C"]
+            mbmodel_fail.loadm(example_model_fail)
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail["reactions"] = (1, 2, 3, 4, 5)
+            mbmodel_fail.loadm(example_model_fail)
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            example_model_fail["params"] = "abcdefg"
+            mbmodel_fail.loadm(example_model_fail)
+        # test with a model with repeated ids
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            # get a new set of parameters where one of ids is repeated with specs
+            example_model_fail["params"] = {
+                "spec1": {"name": "koff", "val": 0.2},
+                "param2": {"name": "kon", "val": 10000000.0},
+            }
+            mbmodel_fail.loadm(example_model_fail)
 
     def test_todict(self):
         mbmodel = MolybdenumModel()

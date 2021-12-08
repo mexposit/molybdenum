@@ -1,3 +1,8 @@
+# Molybdenum model builder
+
+[![Coverage Status](https://coveralls.io/repos/github/mexposit/molybdenum/badge.svg)](https://coveralls.io/github/mexposit/molybdenum)
+[![Coverage Status](https://coveralls.io/repos/github/mexposit/molybdenum/badge.svg)](https://coveralls.io/github/mexposit/molybdenum)
+
 
 For heroku:
  1. Create new app

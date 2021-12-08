@@ -1,36 +1,4 @@
 
-
-def create_ids(mb_model):
-    """
-    Assigns arbitrary node ids based on species and reactions of a molybdenum model
-    
-    Inputs
-      mb_model: nested dictionary in molybdenum format with species and reactions defined, at least
-    
-    Outputs
-      node_to_id: dictionary with:
-         keys: integers corresponding to node ids
-         values: corresponding ids in the molybdenum model
-    """    
-    try:
-        type(mb_model['species']) == dict
-    except:
-        raise ValueError(f'Molybdenum model must have a "species" key with a dictionary value')
-    
-    try:
-        type(mb_model['reactions']) == dict
-    except:
-        raise ValueError(f'Molybdenum model must have a "reactions" key with a dictionary value')
-    
-    node_to_id = dict()
-    mb_ids = list(mb_model['species'].keys()) + list(mb_model['reactions'].keys())
-    
-    for node_id, mb_id in enumerate(mb_ids, 1):
-        node_to_id[node_id] = mb_id
-
-    return node_to_id
-
-
 class MolybdenumModel(object):
     def __init__(self):
         self.species = dict()
@@ -39,28 +7,85 @@ class MolybdenumModel(object):
         self.node_to_id = dict()
         self.sim_params = dict()
         # not implemented yet
-        # self.events = dict()
+        # self.events = dict()   
+
+    def create_ids(self):
+        """
+        Assigns arbitrary node ids based on species and reactions of a molybdenum model
+        
+        Inputs
+        mb_model: nested dictionary in molybdenum format with species and reactions defined, at least
+        
+        Outputs
+        node_to_id: dictionary with:
+            keys: integers corresponding to node ids
+            values: corresponding ids in the molybdenum model
+        """    
+
+        node_to_id = dict()
+        mb_ids = list(self.species.keys()) + list(self.reactions.keys())
+        
+        for node_id, mb_id in enumerate(mb_ids, 1):
+            node_to_id[node_id] = mb_id
+
+        self.node_to_id = node_to_id
+
+        return None
 
     def loadm(self, molybdenum_model):
-        """Note this is not an update, erases everything that was there previously
+        """
+        Note this is not an update, erases everything that was there previously
         
-        TODO: needs to be more elaborate. What if no concentration is passed as default for species? error or assign one?
         TODO: what if an specie starts with $ symbol, should we turn Fixed=True automatically? I would say, yes! and raise error if Fixed was explicitly false but $ is in name, this would cause confusion
         TODO: perform a check that all ids (keys in dictionaries) are unique for species, params and reactions, if not invalid format
         """
         import copy
+
+        try:
+            type(molybdenum_model) == dict
+        except:
+            raise ValueError(f'Molybdenum model must be entered as a dictionary, but got {type(molybdenum_model)}')
+        
+        
         # copy is important or next steps would be modifying initial dictionary
         # deepcopy is required because there are recursive lists/dictionaries and .copy() does not copy them
         mbmod = copy.deepcopy(molybdenum_model)
+
+        if 'species' not in mbmod.keys():
+            raise ValueError(f'Molybdenum model must have a "species" key')
+        elif 'reactions' not in mbmod.keys():
+            raise ValueError(f'Molybdenum model must have a "reactions" key')
+        elif 'params' not in mbmod.keys():
+            raise ValueError(f'Molybdenum model must have a "params" key')
+        else:
+            pass
+        
+        if type(mbmod['species']) != dict:
+            raise ValueError(f'Molybdenum model must have a "species" key with a dictionary value, but got {type(mbmod["species"])}')
+        
+        if type(mbmod['reactions']) != dict:
+            raise ValueError(f'Molybdenum model must have a "reactions" key with a dictionary value, but got {type(mbmod["species"])}')
+        
+        if type(mbmod['params']) != dict:
+            raise ValueError(f'Molybdenum model must have a "params" key with a dictionary value, but got {type(mbmod["species"])}')
+        
+        # check that all ids (keys within species, reactions and params) are unique
+        ids_list = list(mbmod['species'].keys()) + list(mbmod['reactions'].keys()) + list(mbmod['params'].keys())
+        
+        if len(set(ids_list)) != len(ids_list):
+            raise ValueError(f'Not all ids in molybdenum model are unique')
+
+        # assign necessary keys
         self.species = mbmod['species']
         self.reactions = mbmod['reactions']
         self.params = mbmod['params']
-        # some are optional
+
+        # some keys are optional
         if 'node_to_id' in mbmod.keys():
             self.node_to_id = mbmod['node_to_id']
         else:
             # if not there, create it from ids in the model
-            self.node_to_id = create_ids(mbmod)
+            self.create_ids()
         if 'sim_params' in mbmod.keys():
             self.sim_params = mbmod['sim_params']
         else:
