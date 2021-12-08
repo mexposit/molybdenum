@@ -205,6 +205,10 @@ end
         mbmodel3 = MolybdenumModel()
         mbmodel3.loadm(self.example_mbmodel_wnode)
         self.assertEqual(mbmodel3.node_to_id, self.example_node_to_id)
+        # try passing a model that is not a dictionary
+        mbmodel_fail = MolybdenumModel()
+        with self.assertRaises(ValueError):
+            mbmodel_fail.loadm(["A", "B", "C", "D"])
         # try passing models without required keys
         mbmodel_fail = MolybdenumModel()
         with self.assertRaises(ValueError):
@@ -258,7 +262,18 @@ end
         self.assertIsInstance(
             mbmodel.tosimpleSbml(), simplesbml.simplesbml.SbmlModel
         )
-        # self.assertEqual(mbmodel.tosimpleSbml(), self.example_simpleSBML)
+        # try passing in a model where a species name is preceeded by $
+        # and check that output of the model appears as fixed
+        mod_model = self.example_mbmodel.copy()
+        mod_model["species"] = {
+            "spec1": {"name": "$E", "amt": 5e-21, "fixed": False},
+            "spec2": {"name": "S", "amt": 1e-20, "fixed": False},
+            "spec3": {"name": "ES", "amt": 0.0, "fixed": False},
+            "spec4": {"name": "P", "amt": 0.0, "fixed": False},
+        }
+        mbmodel.loadm(mod_model)
+        # model should have one boundary condition if this is the case
+        self.assertIn('boundaryCondition="true"', str(mbmodel.tosimpleSbml()))
 
     def test_toSBMLstr(self):
         mbmodel = MolybdenumModel()
@@ -283,6 +298,21 @@ end
         mbmodel = MolybdenumModel()
         mbmodel.loadm(self.example_mbmodel)
         self.assertEqual(mbmodel.toGraph(), self.example_graph)
+        # check error if node_to_id contains an id that is not defined
+        with self.assertRaises(ValueError):
+            example_model_fail = self.example_mbmodel.copy()
+            # get a new set of parameters where one of ids is repeated with specs
+            example_model_fail["node_to_id"] = {
+                1: "spec1",
+                2: "undefinednode",
+                3: "spec3",
+                4: "spec4",
+                5: "reac1",
+                6: "reac2",
+            }
+            mbmodel.loadm(example_model_fail)
+            # this should raise the error
+            mbmodel.toGraph()
 
 
 if __name__ == "__main__":

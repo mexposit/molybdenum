@@ -37,13 +37,10 @@ class MolybdenumModel(object):
         Note this is not an update, erases everything that was there previously
         
         TODO: what if an specie starts with $ symbol, should we turn Fixed=True automatically? I would say, yes! and raise error if Fixed was explicitly false but $ is in name, this would cause confusion
-        TODO: perform a check that all ids (keys in dictionaries) are unique for species, params and reactions, if not invalid format
         """
         import copy
 
-        try:
-            type(molybdenum_model) == dict
-        except:
+        if type(molybdenum_model) != dict:
             raise ValueError(f'Molybdenum model must be entered as a dictionary, but got {type(molybdenum_model)}')
         
         
