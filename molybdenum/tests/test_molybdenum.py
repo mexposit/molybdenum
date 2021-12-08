@@ -3,6 +3,7 @@ import unittest
 import sys
 
 sys.path.append("../")
+sys.path.append("molybdenum/")
 
 import simplesbml
 from molybdenum import MolybdenumModel
