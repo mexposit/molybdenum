@@ -29,7 +29,7 @@ install:
     # - source activate testing-env
     # - conda install --yes coverage coveralls flake8 nose
 script:
-    - coverage run -m python molybdenum/tests/test_molybdenum.py    
+    - coverage run -m unittest discover    
 
 after_success:
     - coveralls
