@@ -269,7 +269,7 @@ end
                 },
                 {
                     "id": 4,
-                    "title": "Prot",
+                    "title": "Prod",
                     "x": 0.0,
                     "y": 0.0,
                     "nodeClass": "species",
@@ -322,8 +322,19 @@ end
         }
 
     ##################################
-    ## Test in and output functions ##
+    ###    Test class functions    ###
     ##################################
+
+    def test_create_ids(self):
+        # assign example species and reactions to model
+        mbmodel = MolybdenumModel()
+        # assign species and reactions
+        mbmodel.species = self.example_species
+        mbmodel.reactions = self.example_react
+        # create node_to_ids
+        mbmodel.create_ids()
+        # check if it matches with the example one
+        self.assertEqual(mbmodel.node_to_id, self.example_node_to_id)
 
     def test_loadm(self):
         mbmodel = MolybdenumModel()
@@ -666,10 +677,59 @@ end
         self.assertEqual(sorted(param_names), sorted(['kon', 'kcat', 'const', 'h']))
 
     def test_update_from_graph(self):
+        mbmodel = MolybdenumModel()
+        mbmodel.loadm(self.example_mbmodel)
+        mbmodel.update_from_graph(self.example_updated_graph)
+        # check if model updated from graph matches with manually curated update
+        # we don't check all parameters because there are some that do not change
+        self.assertEqual(mbmodel.species.keys(),
+            self.example_updated_mbmodel['species'].keys())
+        self.assertEqual(mbmodel.reactions.keys(),
+            self.example_updated_mbmodel['reactions'].keys())
+        self.assertEqual(mbmodel.reactions['reac1']['reagents'],
+            self.example_updated_mbmodel['reactions']['reac1']['reagents'])
+        self.assertEqual(mbmodel.reactions['reac3']['products'],
+            self.example_updated_mbmodel['reactions']['reac3']['products'])
 
         return None
 
     def test_update_from_form(self):
+        mbmodel = MolybdenumModel()
+        mbmodel.loadm(self.example_mbmodel)
+        form_info = [
+                        ('spec1_amt',['12.']),
+                        ('spec1_fixed',['True']),
+                        ('reac1_expression',['2*E+koff*S']),
+                        ('param3_val',['500']),
+                        ('param3_name',['kinh'])
+                    ]
+        # check if all parameters that can be updated in a form get proper updates
+        mbmodel.update_from_form(form_info)
+        self.assertEqual(mbmodel.species['spec1']['amt'], 12)
+        self.assertEqual(mbmodel.species['spec1']['fixed'], True)
+        self.assertEqual(mbmodel.reactions['reac1']['expression'], '2*E+koff*S')
+        self.assertEqual(mbmodel.params['param3']['val'], 500)
+        self.assertEqual(mbmodel.params['param3']['name'], 'kinh')
+
+        # check for failure modes
+        with self.assertRaises(ValueError):
+            mbmodel.update_from_form([("not a tupe")])
+        with self.assertRaises(ValueError):
+            mbmodel.update_from_form([("invalidnamenoattribute",["2"])])
+        with self.assertRaises(ValueError):
+            mbmodel.update_from_form([("spec1_amt",["25","13"])])
+        # with self.assertRaises(ValueError):
+        #     mbmodel.update_from_form([("spec1_unvalidatt",["25"])])
+        # with self.assertRaises(TypeError):
+        #     mbmodel.update_from_form([("spec1_amt",["invalidtype"])])
+        # with self.assertRaises(TypeError):
+        #     mbmodel.update_from_form([("reac1_unvalidatt",["25"])])
+        # with self.assertRaises(TypeError):
+        #     mbmodel.update_from_form([("reac1_expression",[{"error":"err"}])])
+        # with self.assertRaises(TypeError):
+        #     mbmodel.update_from_form([("param1_unvalidatt",["25"])])
+        # with self.assertRaises(TypeError):
+        #     mbmodel.update_from_form([("param1_val",{"error":"err"})])
 
         return None
 

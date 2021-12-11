@@ -20,15 +20,15 @@ class MolybdenumModel(object):
         """
         Assigns arbitrary node ids based on species and reactions of a molybdenum model
         
-        Inputs
-        mb_model: nested dictionary in molybdenum format with species and reactions defined, at least
-        
-        Outputs
-        node_to_id: dictionary with:
-            keys: integers corresponding to node ids
-            values: corresponding ids in the molybdenum model
-        """    
-
+        Args:
+            uses model in molybdenum format with species and reactions defined
+            
+        Returns:
+            creates node_to_id and assigns it to the model in self.
+            node_to_id:
+                keys: integers corresponding to node ids
+                values: corresponding ids in the molybdenum model
+        """
         node_to_id = dict()
         mb_ids = list(self.species.keys()) + list(self.reactions.keys())
         
@@ -40,13 +40,71 @@ class MolybdenumModel(object):
         return None
 
     def loadm(self, molybdenum_model):
-        """
-        Note this is not an update, erases everything that was there previously
-        
-        TODO: what if an specie starts with $ symbol, should we turn Fixed=True automatically? I would say, yes! and raise error if Fixed was explicitly false but $ is in name, this would cause confusion
-        """
-        
+        """Creates internal representation of molybdenum model from a dictionary
 
+        Args:
+            molybdenum_model: dictionary with some required and optional keys:
+                (required) 'species': dictionary with component IDs as keys and 
+                    values are dictionaries with keys "name", "amt", "fixed"
+                (required) 'reactions': dictionary with component IDs as keys and 
+                    values are dictionaries with keys "name", "reagents",
+                    "products", "expression"
+                (required) 'params': dictionary with component IDs as keys and 
+                    values are dictionaries with keys "name", "val"
+                (optional) 'node_to_id': dictionary with node IDs as keys and
+                    values are the component IDs used as keys in "species",
+                    "reactions" and "params"
+                (optional) 'sim_param': dictionary with "sim_start", "sim_end"
+                    and "sim_points" as keys and associated values for those
+        
+        Returns:
+            model representation kept in class storing all those dictionaries.
+            If node_to_id is not passed, it is created.
+            Note this is not an update, erases everything that was in the object
+
+        Example:
+            Example input model:
+            {
+                "species": {
+                    "spec1": {"name": "E", "amt": 10, "fixed": True},
+                    "spec2": {"name": "S", "amt": 400, "fixed": False},
+                    "spec3": {"name": "ES", "amt": 0.0, "fixed": False},
+                    "spec4": {"name": "P", "amt": 0.0, "fixed": False}
+                },
+                "reactions": {
+                    "reac1": {
+                        "name": "veq",
+                        "reagents": ["E","S"],
+                        "products": ["ES"],
+                        "expression": "(kon*E-koff*S)",
+                    },
+                    "reac2": {
+                        "name": "vcat",
+                        "reagents": ["ES"],
+                        "products": ["P"],
+                        "expression": "kcat*ES",
+                    }
+                },
+                "node_to_id" = {
+                    1: "spec1",
+                    2: "spec2",
+                    3: "spec3",
+                    4: "spec4",
+                    5: "reac1",
+                    6: "reac2"
+                },
+                "params": {
+                    "param1": {"name": "koff", "val": 0.2},
+                    "param2": {"name": "kon", "val": 0.4},
+                    "param3": {"name": "kcat", "val": 10.0},
+                },
+                "sim_params": {
+                    "sim_start": 0.0,
+                    "sim_end": 15.0,
+                    "sim_points": 120
+                }
+            }
+        """
         if type(molybdenum_model) != dict:
             raise ValueError(f'Molybdenum model must be entered as a dictionary, but got {type(molybdenum_model)}')
         
@@ -98,22 +156,42 @@ class MolybdenumModel(object):
         return None
     
     def todict(self):
-        """
-        Get all information in a nested dictionary
+        """Exports model stored in class to a dictionary
+
+        Args:
+            internal model representation
+
+        Returns:
+            molybdenum representation of the model in a dictionary as defined
+            as input in loadm() function
         """
         return self.__dict__
         
     def tojson(self):
-        """
-        In Json, things are double quoted and false is in lowercase
+        """Exports model as a json list
+
+        Args:
+            internal model representation
+
+        Returns:
+            json representation of the components defined in the model, with the
+            same structure as the dictionary defined above
         """
         json_rep = json.dumps(self.todict())
         return json_rep
 
     def get_modifier_names(self, reac_id):
-        """
-        Inputs a reaction id, searches for the expression in the reaction
-        and identifies modifiers: species that are in the expression but not as reactant or product
+        """Identifies modifiers in a reaction
+        
+        Looks at the reaction expression to identify those species that 
+        affect its kinetics but are neigher reagents nor products, those species
+        are known as modifiers
+
+        Args:
+            reac_id: ID assigned to the reaction with modifiers
+
+        Returns:
+            modifiers: list of species names that act as modifiers
         """
         # define mathematical characters to split the expression into
         math_chars = '[+\-*/\[\]\(\)\s,;^]'
@@ -140,7 +218,14 @@ class MolybdenumModel(object):
 
     
     def tosimpleSbml(self):
-        """Need to write this up now"""
+        """Create a simpleSBML model from a molybdenum representation
+
+        Args:
+            internal model representation
+
+        Returns:
+            simpSbml_rep: simpleSBML object containing the model
+        """
         # initialize a model
         simpSbml_rep = simplesbml.SbmlModel()
         
@@ -180,6 +265,14 @@ class MolybdenumModel(object):
         return simpSbml_rep
 
     def toSBMLstr(self):
+        """Gets SBML representation of the model
+
+        Args:
+            internal model representation
+
+        Returns:
+            sbml_str: string containing the model in SBML format
+        """
         # gets smbl
         simpSbml_rep = self.tosimpleSbml()
         #toSBML is also a function from simpleSBML models that gets the sbml string, (confusing?)
@@ -187,20 +280,90 @@ class MolybdenumModel(object):
         return sbml_str
 
     def tosimpleSbmlWriteup(self):
+        """Gets simpleSBML commands that would reproduce the model
+
+        Args:
+            internal model representation
+        
+        Returns:
+            sbml_writeup: string where each line is a python command using the
+                simpleSBML library that would reproduce the model
+        """
         sbml_rep = self.toSBMLstr()
         sbml_writeup = simplesbml.simplesbml.writeCodeFromString(sbml_rep)
         return sbml_writeup
 
     def toAntimony(self):
+        """Gets the antimony representation of the model
+
+        Args:
+            internal model representation
+
+        Returns:
+            sb_rep: string in antimony format with model information that would
+                allow using the model as input in tellurium
+        """
         r = te.antimonyConverter()
         sbml_str = self.toSBMLstr()
         sb_rep = r.sbmlToAntimony(sbml_str)[1]
         return sb_rep
 
     def toGraph(self):
-        """
-        Need to write this one up
-        #TODO: for this, new X and Y values should be blank or zero, leave it up for further development
+        """Converts the current model to its node representation
+
+        Args:
+            internal model representation, specifically the species and reaction
+            names, the node_to_id information and reaction reagents/products
+
+        Returns:
+            graph_rep: graphical representation of the model, a dictionary
+                with these keys:
+                "nodes": values are a list of dictionaries with "id", "title",
+                    "x", "y", "nodeClass" attributes
+                "edges": values are a list of dictionaries with "source" and
+                    "target" attributes that have a node id assigned to them
+                Example:
+                {
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "title": "E",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 2,
+                            "title": "S",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 3,
+                            "title": "ES",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 5,
+                            "title": "veq",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "reactions",
+                        }
+                    ],
+                    "edges": [
+                        {"source": 1, "target": 5},
+                        {"source": 2, "target": 5},
+                        {"source": 5, "target": 3}
+                    ],
+                }
+
+        #TODO: for this, new X and Y values should be blank or zero,
+        # leave it up for further development to find a nice position for new 
+        # species or reactions
         """      
         # initialize object to keep graph
         graph_rep = {'nodes': [], 'edges': []}
@@ -256,14 +419,18 @@ class MolybdenumModel(object):
         return graph_rep
     
     def check_nodes(self, graph_rep):
-        """
-        Checks if there are any new species or reactions
+        """Checks if there are any new species or reactions
         
-        Inputs:
+        Args:
           graph_rep: graphical representation of the model
         
-        Outputs:
-          nested dictionary indicating new or deleted species or reactions
+        Returns:
+            new_nodes: dictionary with a key for "species" and another for "reactions"
+                containing lists with the node ids of new species or reactions
+                Ex. {'species': [1,2,3], 'reactions':[6,8]}
+            del_nodes: dictionary with a key for "species" and another for "reactions"
+                containing lists with the node ids of deleted species or reactions
+                Ex. {'species': [4,5], 'reactions':[9]}
         """
         graph_rep = graph_rep.copy()
         new_nodes = {'species':[],'reactions':[]}
@@ -292,8 +459,20 @@ class MolybdenumModel(object):
         return new_nodes, del_nodes
 
     def get_new_id(self, comp_class):
-        """
-        Generates new IDs for species, reactions or parameters
+        """Generates new component ids for species, reactions or parameters
+
+        New ids adopt the format of spec/reac/param + integer.
+        This function looks for existing ids in the model that follow this
+        format and creates a new one using the lowest possible integer that 
+        has not yet been used
+
+        Args:
+            comp_class: string indicating the kind of component to generate,
+                either 'species', 'reactions' or 'params'
+        
+        Returns:
+            new_id: unique and non-used id for a component of the desired kind
+                Ex. 'spec3' or 'reac5'
         """
         # define the prefix for each component class
         prefixes = {'species': 'spec',
@@ -307,10 +486,28 @@ class MolybdenumModel(object):
         ct = 1
         while prefix+str(ct) in self.todict()[comp_class].keys():
             ct += 1
-        return prefix+str(ct)
+        new_id = prefix+str(ct)
+        return new_id
     
     ## TODO: what is the correct place to locate functions that do not use self? in or out the class or in a utils module?
     def init_spec(self, name, amt=10.0, fixed=False):
+        """Initialize a species dictionary to add to the molybdenum model
+        
+        Args:
+            name: string indicating the name of the species.
+            amt: numerical value indicating the initial amount of the species.
+                No units allowed.
+            fixed: boolean indicating if it is a boundary species with fixed
+                concentration through the simulation.
+
+        Returns:
+            new_spec: dicitionary following the format for molybdenum models
+                Ex. {
+                    'name': 'E',
+                    'amt': 10.0,
+                    'fixed': True
+                }
+        """
         if (str(fixed) != 'False') and (str(fixed) != 'True'):
             # do not accept other values that could be parsed by bool() like
             # integers or None
@@ -331,6 +528,27 @@ class MolybdenumModel(object):
         return new_spec
      
     def init_reac(self, name, reagents=[], products=[], expression='undefined'):
+        """Initialize a reaction dictionary to add to the molybdenum model
+        
+        Args:
+            name: string indicating the name of the reaction.
+                Ex. 'veq' or 'Alcohol hydrolysis'
+            reagents: list of strings corresponding to species names that act
+                as reagents. Ex. ['E','S']
+            products: list of strings corresponding to species names that act
+                as products. Ex. ['ES']
+            expression: string describing the kinetic formula of the reaction
+                Ex. 'koff*A + 2*B'
+
+        Returns:
+            new_reac: dicitionary following the format for molybdenum models
+                Ex. {
+                    'name': 'veq',
+                    'reagents': ['E','S'],
+                    'products': ['ES'],
+                    'expression': 'koff*A + 2*B'
+                }
+        """
         if (type(name) != str) and (type(name) != int):
             # pretty much everything can be converted to string in python
             # make sure that a string or integer is actually passed
@@ -350,6 +568,20 @@ class MolybdenumModel(object):
         return new_reac
     
     def init_param(self, name, val=0.0):
+        """Initialize a parameter dictionary to add to the molybdenum model
+        
+        Args:
+            name: string indicating the name of the parameter. Ex. 'koff'
+            val: number defining the value of that parameter. No units accepted.
+                Ex. 25.05
+
+        Returns:
+            new_param: dicitionary following the format for molybdenum models
+                Ex. {
+                    'name': 'koff',
+                    'val': 25.05
+                }
+        """
         if (type(name) != str) and (type(name) != int):
             # pretty much everything can be converted to string in python
             # make sure that a string or integer is actually passed
@@ -362,7 +594,6 @@ class MolybdenumModel(object):
             
         return new_param
 
-    #TODO: this one does not use self, should go outside of class?
     def update_expr(self, expr, old_name, new_name):
         """Changes the name of a parameter used in a reaction expression
 
@@ -570,8 +801,56 @@ class MolybdenumModel(object):
         return None
     
     def update_from_graph(self, graph_rep_init):
-        """
-        Update model from a graphical representation
+        """Update molybdenum representation from a graphical representation
+
+        Args:
+            graph_rep_init: graphical representation of the model, a dictionary
+                with these keys:
+                "nodes": values are a list of dictionaries with "id", "title",
+                    "x", "y", "nodeClass" attributes
+                "edges": values are a list of dictionaries with "source" and
+                    "target" attributes that have a node id assigned to them
+                Example:
+                {
+                    "nodes": [
+                        {
+                            "id": 1,
+                            "title": "E",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 2,
+                            "title": "S",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 3,
+                            "title": "ES",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "species",
+                        },
+                        {
+                            "id": 5,
+                            "title": "veq",
+                            "x": 0.0,
+                            "y": 0.0,
+                            "nodeClass": "reactions",
+                        }
+                    ],
+                    "edges": [
+                        {"source": 1, "target": 5},
+                        {"source": 2, "target": 5},
+                        {"source": 5, "target": 3}
+                    ],
+                }
+
+        Returns:
+            updates internal model representation
         """
         graph_rep = copy.deepcopy(graph_rep_init)
         
@@ -637,6 +916,20 @@ class MolybdenumModel(object):
 
 
     def update_from_form(self, form_list):
+        """Update molybdenum representation with values from HTML form
+
+        Args:
+            form_list: list of parameters and their values as defined in the form
+                Ex. [
+                        ('spec1_amt',['12.']),
+                        ('spec1_fixed',['True']),
+                        ('reac1_expression',['2*E+koff*S'])
+                        ('param5_val',['500'])
+                    ]
+
+        Returns:
+            updates internal model representation
+        """
         for form_input in form_list:
             try:
                 info, value = form_input
@@ -775,8 +1068,13 @@ class MolybdenumModel(object):
 
 
     def get_plot_as_htmlimage(self, temodel):
-        """
-        Requires model to be simulated previously
+        """Gets the plot produced by tellurium when running the model in HTML
+
+        Args:
+            temodel: tellurium model
+
+        Returns:
+            img_str: image coded in base64 string and adjusted with html code
         """
         io_str = io.BytesIO()
         temodel.plot(dpi=300, savefig=io_str, format='jpg')
