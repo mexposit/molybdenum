@@ -77,8 +77,10 @@
 							<div class="row">
 								<div class="col-sm-6">
 									<div class="row">
-										<div class="col-md-4"><img src="../static/img/species_represent_transp.png" class="img-fluid" alt="Species representation"></div>
-										<div class="col-md-4"><img src="../static/img/reactions_represent_transp.png" class="img-fluid" alt="Reactions representation"></div>
+										<div class="col-md-4"><img src="../static/img/species_represent_transp.png"
+												class="img-fluid" alt="Species representation"></div>
+										<div class="col-md-4"><img src="../static/img/reactions_represent_transp.png"
+												class="img-fluid" alt="Reactions representation"></div>
 									</div>
 								</div>
 								<div class="col-sm-6">
@@ -304,7 +306,18 @@
 								<!-- Flask inserts here the graphic produced when running the model -->
 							</div>
 						</div>
-						<!-- TODO: Add other divs to download csv file, or show important information, etc... -->
+
+						<!-- Don't show by default, displayed only when model has been run -->
+
+						<div class="container" style='display:none' display="none" id="downloadResults">
+							<div class="row mb-3 justify-content-center">
+								<div class="col-md-5">
+									<a href="/download_results">Download results</a>
+								</div>
+							</div>
+						</div>
+						<!-- TODO: Add other divs to show dataframe in page or other information, etc... -->
+						<!-- TODO: or even give access to tellurium model and let user run commands like .getFloatingSpeciesConc() by typing them in a text box and printing results in another-->
 					</div>
 				</div>
 			</div>
@@ -443,6 +456,8 @@
 				success: function (response) {
 					// insert graph
 					$("#ModelPlot").html(response);
+					// show button to download graph (initially hidden)
+					$('#downloadResults').show();
 				},
 				error: function (request, status, error) {
 					// TODO: insert error message in red

@@ -1,7 +1,6 @@
 import os, sys
 
-from flask import Flask, render_template, request, jsonify
-import numpy as np
+from flask import Flask, render_template, request, jsonify, Response
 
 from bs4 import BeautifulSoup
 
@@ -133,13 +132,23 @@ def run_model():
     except Exception as e:
         return jsonify(message=str(e)),500
     te_model, results = mb_model.run()
+    # make results acessible out of the function
+    run_model.results = results
+    # now create plot representation
     te_plot_img = mb_model.get_plot_as_htmlimage(te_model)
     # use beautifulsoup to add the class="img-fluid" to the image to make it responsive with bootstrap
     soup = BeautifulSoup(te_plot_img, 'html.parser')
     soup.find("img")['class'] = "img-fluid"
     return str(soup)
 
-
+# download CSV results
+@app.route("/download_results")
+def download_results():
+    result_df = mb_model.te_result_to_df(run_model.results)
+    return Response(
+        result_df.to_csv(index=False),
+        mimetype='text/csv',
+        headers={"Content-disposition":"attachment; filename=simresult.csv"})
 
 # #background process happening without any refreshing
 # @app.route('/background_process_test', methods=["GET","POST"])
