@@ -808,7 +808,7 @@ end
         temod, _ = mbmodel.run()
         expected_image_start = '<img align="center" src="data:image/png;base64,i\
 VBORw0KGgoAAAANSUhEUgAABg4AAARMCAYAAABBImjmAAAAOXRFWHRTb2Z0d2FyZQBNY\
-XRwbG90bGliIHZlcnNpb24zLjUuMCwgaHR0cHM6Ly9tYXRwbG90'
+XRwbG90bGliIHZlcnNpb24zLj'
         self.assertEqual(mbmodel.get_plot_as_htmlimage(temod)[:len(expected_image_start)],expected_image_start)     
         return None
 
