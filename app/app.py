@@ -132,7 +132,7 @@ def run_model():
         mb_model.update_sim_params(form_lists)
     except Exception as e:
         return jsonify(message=str(e)),500
-    te_model = mb_model.run()
+    te_model, results = mb_model.run()
     te_plot_img = mb_model.get_plot_as_htmlimage(te_model)
     # use beautifulsoup to add the class="img-fluid" to the image to make it responsive with bootstrap
     soup = BeautifulSoup(te_plot_img, 'html.parser')

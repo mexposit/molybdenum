@@ -1,3 +1,10 @@
+import re, copy, io, base64
+import warnings
+import json
+
+import pandas as pd
+import simplesbml
+import tellurium as te
 
 class MolybdenumModel(object):
     def __init__(self):
@@ -38,7 +45,7 @@ class MolybdenumModel(object):
         
         TODO: what if an specie starts with $ symbol, should we turn Fixed=True automatically? I would say, yes! and raise error if Fixed was explicitly false but $ is in name, this would cause confusion
         """
-        import copy
+        
 
         if type(molybdenum_model) != dict:
             raise ValueError(f'Molybdenum model must be entered as a dictionary, but got {type(molybdenum_model)}')
@@ -100,17 +107,46 @@ class MolybdenumModel(object):
         """
         In Json, things are double quoted and false is in lowercase
         """
-        import json
         json_rep = json.dumps(self.todict())
         return json_rep
+
+    def get_modifier_names(self, reac_id):
+        """
+        Inputs a reaction id, searches for the expression in the reaction
+        and identifies modifiers: species that are in the expression but not as reactant or product
+        """
+        # define mathematical characters to split the expression into
+        math_chars = '[+\-*/\[\]\(\)\s,;^]'
+        
+        # get expression, reagents and products
+        reac_expr = self.reactions[reac_id]['expression']
+        reac_reag = self.reactions[reac_id]['reagents']
+        reac_prod = self.reactions[reac_id]['products']
+
+        # get species names
+        spec_names = [spec['name'] for spec in self.species.values()]
+
+        # keep track of modifiers for this reaction as list of species names
+        modifiers = []
+        # split expression by math characters, giving a list of parameters and species
+        vals = re.split(math_chars, reac_expr)
+        # iterate by each parameter
+        for val in set(vals):
+            # if it is neither a reagent nor a product but yes a specie, it is a modifier
+            if (val not in reac_reag) and (val not in reac_prod) and (val in spec_names):
+                modifiers.append(val)
+
+        return modifiers
+
     
     def tosimpleSbml(self):
         """Need to write this up now"""
-        #TODO: is importing inside the function correct?
-        import simplesbml
         # initialize a model
         simpSbml_rep = simplesbml.SbmlModel()
         
+        # will keep each species added in a dictionary to use as modifiers later
+        # if required
+        spec_dict = {}
         # add species
         for spec in self.species.values():
             # if species is fixed, add $ sign to its name (if not there already) so that
@@ -120,14 +156,20 @@ class MolybdenumModel(object):
             else:
                 spec_name = spec['name']
             # component support in the future
-            simpSbml_rep.addSpecies(species_id = spec_name, amt = spec['amt'])#, comp='c1')
+            spec_dict[spec_name] = simpSbml_rep.addSpecies(species_id = spec_name, amt = spec['amt'])#, comp='c1')
         
         # add reactions
-        for reac in self.reactions.values():
-            simpSbml_rep.addReaction(reactants=reac['reagents'],
+        for reac_id, reac in self.reactions.items():
+            # keep reaction in variable in case we need to add modifiers to it
+            reac_simpsbml = simpSbml_rep.addReaction(reactants=reac['reagents'],
                                      products=reac['products'],
                                      expression=reac['expression'],
                                      rxn_id=reac['name'])
+            # get names of modifier species
+            modifier_list = self.get_modifier_names(reac_id)
+            for modifier_name in modifier_list:
+                # add the addSpecies object by searching by species name in dictionary
+                reac_simpsbml.addModifier(spec_dict[modifier_name])
 
         # add parameters
         for param in self.params.values():
@@ -145,13 +187,11 @@ class MolybdenumModel(object):
         return sbml_str
 
     def tosimpleSbmlWriteup(self):
-        import simplesbml
         sbml_rep = self.toSBMLstr()
         sbml_writeup = simplesbml.simplesbml.writeCodeFromString(sbml_rep)
         return sbml_writeup
 
     def toAntimony(self):
-        import tellurium as te
         r = te.antimonyConverter()
         sbml_str = self.toSBMLstr()
         sb_rep = r.sbmlToAntimony(sbml_str)[1]
@@ -271,9 +311,17 @@ class MolybdenumModel(object):
     
     ## TODO: what is the correct place to locate functions that do not use self? in or out the class or in a utils module?
     def init_spec(self, name, amt=10.0, fixed=False):
-        if name[0] == '$':
-            fixed=True
+        if (str(fixed) != 'False') and (str(fixed) != 'True'):
+            # do not accept other values that could be parsed by bool() like
+            # integers or None
+            raise TypeError('Boolean values must be specified only by True or False')
+        if (type(name) != str) and (type(name) != int):
+            # pretty much everything can be converted to string in python
+            # make sure that a string or integer is actually passed
+            raise TypeError('Name must be a string or integer')
         try:
+            if str(name)[0] == '$':
+                fixed=True
             new_spec = {'name': str(name),
                        'amt': float(amt),
                        'fixed': bool(fixed)}
@@ -283,6 +331,14 @@ class MolybdenumModel(object):
         return new_spec
      
     def init_reac(self, name, reagents=[], products=[], expression='undefined'):
+        if (type(name) != str) and (type(name) != int):
+            # pretty much everything can be converted to string in python
+            # make sure that a string or integer is actually passed
+            raise TypeError('Name must be a string or integer')
+        if (type(expression) != str):
+            # pretty much everything can be converted to string in python
+            # make sure that a string or integer is actually passed
+            raise TypeError('Name must be a string or integer')
         try:
             new_reac = {'name': str(name),
                         'reagents': list(reagents),
@@ -294,6 +350,10 @@ class MolybdenumModel(object):
         return new_reac
     
     def init_param(self, name, val=0.0):
+        if (type(name) != str) and (type(name) != int):
+            # pretty much everything can be converted to string in python
+            # make sure that a string or integer is actually passed
+            raise TypeError('Name must be a string or integer')
         try:
             new_param = {'name': str(name),
                         'val': float(val)}
@@ -304,11 +364,21 @@ class MolybdenumModel(object):
 
     #TODO: this one does not use self, should go outside of class?
     def update_expr(self, expr, old_name, new_name):
+        """Changes the name of a parameter used in a reaction expression
+
+        Args:
+            expr: reaction expression as a string, ex. '2*A + B* kon / I'
+            old_name: parameter or species name in the expression to be changed
+            new_name: name to change old_name to
+
+        Returns:
+            updated_expression: expression with old_name replaced by new_name
+                deletes all spacing between parameters, not relevant
+
+        Notes:
+            if old_name is not found in the expression, the expression is still processed
+            but nothing changes
         """
-        Note that it looks at each element because manipulating a string
-        would go wrong with parameter names that are subparts of other parameter names, like E and ES
-        """
-        import re
         # surrounding it with parenthesis keeps the element that triggers splitting
         math_chars = '([+\-*\[\]\(\)\s,;^])'
         # split into math symbols
@@ -317,11 +387,20 @@ class MolybdenumModel(object):
         updated_expression = ''.join([new_name if name==old_name else name for name in split_exp])
         return updated_expression
     
-    def update_name_byid(self, node_id, node_name):
-        """
-        Updates one name based on its id.
-        If it is a species name, changes it in the reaction expressions that use it
-        Note: does not work for parameters, as they are not in node_to_id
+    def update_name_byid(self, node_id, element_name):
+        """Updates one speces or reaction name based on its node id
+
+        Args:
+            node_id: integer indicating the node id of the element to change name of
+            element_name: new name to assign to the species or reaction with selected node_id
+
+        Returns:
+            updates the name in the model, so nothing is returned
+
+        Notes:
+            if changing a species name, it also updates its name in the expressions of reaction that use it
+            but if changing species name, it does not update reagents/products in the reactions that use it
+            does not work to rename parameters because they are not in kept track in the node_to_id dictionary
         """
         try:
             mb_id = self.node_to_id[node_id]
@@ -332,31 +411,51 @@ class MolybdenumModel(object):
             # get previous species name
             prev_name = self.species[mb_id]['name']
             # check if name has changed
-            if prev_name != node_name:
+            if prev_name != element_name:
                 # if yes, update the expressions in reactions
                 for reac_info in self.reactions.values():
-                    reac_info['expression'] = self.update_expr(reac_info['expression'], prev_name, node_name)
+                    reac_info['expression'] = self.update_expr(reac_info['expression'], prev_name, element_name)
             else:
                 pass
             # finally, update name to new one
-            self.species[mb_id]['name'] = node_name
+            self.species[mb_id]['name'] = element_name
         elif mb_id in self.reactions.keys():
-            self.reactions[mb_id]['name'] = node_name
+            self.reactions[mb_id]['name'] = element_name
         else:
             raise ValueError(f'Did not find id {node_id} in model')
             
         return None
     
     def add_connection(self, source, target):
-        """
-        Adds connection between source and target.
-        Raises warning if connection is within components of same type
-        Adds as products or reagents depending on which is source or target
-        """
-        import warnings
+        """Adds connection between source and target
 
-        source_id = self.node_to_id[source]
-        target_id = self.node_to_id[target]
+        Args:
+            source: node_id of the species or reaction where connection starts
+            target: node_id of the species or reaction where connection ends
+
+        Returns:
+            updates the model directly.
+            if source is a species, adds its name to reagents of target reaction.
+            if source is a reaction, adds target species name to source reaction products.
+        
+        Raises:
+            warning if both source and target are a species or a reaction
+            ValueError if node id of source or target is not in node_to_id
+
+        Notes:
+            raising a warning means it ignores all connections between species or
+            between reactions, but does not raise an error in response to them
+        """
+        try:
+            source_id = self.node_to_id[source]
+        except:
+            raise ValueError(f'Could not find node_id with id {source}')
+        
+        try:
+            target_id = self.node_to_id[target]
+        except:
+            raise ValueError(f'Could not find node_id with id {target}')
+            
         # if source is species, target is reaction
         if (source_id in self.species.keys()) and (target_id in self.reactions.keys()):
             # add source species as reagent in the target reaction
@@ -371,23 +470,44 @@ class MolybdenumModel(object):
         return None
 
     def is_float(self, element):
+        """Checks if an element can be converted to float
+        
+        Args:
+            element: string, integer or float, or any other element
+            
+        Returns:
+            True if element can be converted to float, False otherwise
+        
+        Note:
+            does not consider True/False boolean values as being possible to 
+            convert them to a float number (in python, float(True) == 1)
         """
-        Helper function, returns True if string can be converted to float
-        """
-        try:
-            float(element)
-            return True
-        except ValueError:
+        if type(element) == str or type(element) == int or type(element) == float:
+            try:
+                float(element)
+                return True
+            except ValueError:
+                return False
+        else:
             return False
     
     def get_reac_params(self):
+        """Get parameters used in reaction expressions
+
+        Args:
+            model defined in self, uses reaction 'expression' attribute
+                and species 'name' attribute
+        
+        Returns:
+            param_list: list of strings defining the parameters used in all the
+                reactions of the model.
+                
+        Notes:
+            does not include any number, operator or species names in the list
+            defining parameters
+            Example input for two reactions: '(kon*E*S-koff*ES)', '2*E+ kcat+koff'
+            Example output: param_list=['kon','koff','kcat']
         """
-        Gets parameters used in reaction expressions.
-        Basically splits expressions and excludes elements that are species
-        Ex. '(kon*E*S-koff*ES)'
-        out: ['kon', 'koff']
-        """
-        import re
         # define mathematical characters to split the expression into
         math_chars = '[+\-*/\[\]\(\)\s,;^]'
         # initialize parameter list
@@ -396,7 +516,8 @@ class MolybdenumModel(object):
         for reac in self.reactions.values():
             # split expression by math characters, giving a list of parameters and species
             vals = re.split(math_chars, reac['expression'])
-            for val in vals:
+            # adding set here allows using the same parameter multiple times in the reaction
+            for val in set(vals):
                 if val == '':
                     # sometimes gets empty values if two math operations following or first/last are parenthesis
                     pass
@@ -410,10 +531,21 @@ class MolybdenumModel(object):
                     # only possible alternative is that value is a parameter
                     param_list.append(val)
 
-        return param_list
+        return list(set(param_list))
 
     def update_parameters(self):
-        """Creates new parameters, delete no longer used ones"""
+        """Creates new parameters, delete no longer used ones
+        
+        Args:
+            checks the model defined in self to get parameters used in reactions
+                and parameters defined in the params dictionary
+        
+        Returns:
+            modifies the model in self by:
+                adding to the params dictionary parameters that are used in reactions
+                    but were not there yet
+                removing from the params dictionary parameters not used in reactions
+        """
         # get list of parameters used by reactions
         reac_param = self.get_reac_params()
         # get list of parameters in model
@@ -428,7 +560,7 @@ class MolybdenumModel(object):
         for param_name in new_param:
             new_id = self.get_new_id('params')
             self.params[new_id] = self.init_param(param_name)
-        
+
         # get relation of param name and its id
         param_name_to_id = {par_info['name']: par_id for par_id, par_info in self.params.items()}
         # delete unused parameters
@@ -441,7 +573,6 @@ class MolybdenumModel(object):
         """
         Update model from a graphical representation
         """
-        import copy
         graph_rep = copy.deepcopy(graph_rep_init)
         
         ## TODO: write functions to check that graph_rep format is okay (unique ids, etc..)
@@ -558,6 +689,30 @@ class MolybdenumModel(object):
         return None
 
     def update_sim_params(self, sim_param):
+        """Defines simulation parameters in model from a dictionary
+
+        Args:
+            sim_param: data passed in the format of an html form having the 
+                attributes "sim_start", "sim_end", and/or "sim_points"
+                example:
+                    [
+                        ('sim_start',['12.']),
+                        ('sim_end',['24.']),
+                        ('sim_points',['500'])
+                    ]
+
+        Returns:
+            updates model defining simulation parameters in a dictionary with
+            "sim_start", "sim_end" and/or "sim_points" elements
+            example: {'sim_start': 12., 'sim_end': 24.,'sim_points': 500}
+                
+        Raises:
+            ValueError if form input is not a tuple with (attr, value) format
+            ValueError if form input value is a list with more than one element
+            ValueError if sim_start and sim_points are not integers or floats
+            ValueError if sim_points is not an integer
+            ValueError if attribute is not "sim_start", "sim_end" or "sim_points"
+        """
         # get dictionary from form
         form_dict = {}
         for form_input in sim_param:
@@ -587,22 +742,42 @@ class MolybdenumModel(object):
         return None
 
     def run(self):
-        import tellurium as te
+        """Simulates model and get results
+        
+        Args:
+            uses the model representation converted to antimony to simulate it
+            with tellurium
 
+        Returns:
+            temodel: tellurium model object
+            results: NamedArray from tellurium simulation
+        """
         temodel = te.loada(self.toAntimony())
-        temodel.simulate(
+        results = temodel.simulate(
             start=self.sim_params['sim_start'],
             end=self.sim_params['sim_end'],
             points=self.sim_params['sim_points']
         )
-        return temodel
+        return temodel, results
+
+    def te_result_to_df(self, arr):
+        """Converts namedarray results to a pandas dataframe
+
+        Args:
+            arr: NamedArray resulting from tellurium simulation
+
+        Returns:
+            df: pd.DataFrame with names for each species
+        """
+        columns = [c[1:-1] if c[0] == "[" else c for c in arr.colnames]
+        df = pd.DataFrame(arr, columns=columns)
+        return df
+
 
     def get_plot_as_htmlimage(self, temodel):
         """
         Requires model to be simulated previously
         """
-        import io, base64
-
         io_str = io.BytesIO()
         temodel.plot(dpi=300, savefig=io_str, format='jpg')
         io_str.seek(0)
